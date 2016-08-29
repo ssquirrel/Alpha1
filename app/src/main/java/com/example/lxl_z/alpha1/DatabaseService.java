@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,9 +27,9 @@ public class DatabaseService {
 
     private SQLiteDatabase db;
 
-    private Map<String, String> map = new HashMap<>();
+    private Map<String, CityID> map = new HashMap<>();
 
-    String getID(String city) {
+    CityID getID(String city) {
         return map.get(city);
     }
 
@@ -69,43 +70,55 @@ public class DatabaseService {
         }
     }
 
-    private void addID(String city, String id) {
+    private void addID(String city, CityID id) {
         map.put(city, id);
     }
 
-    private static DatabaseService getInstance(Context context) {
+    static DatabaseService getInstance(Context context) {
         if (instance == null)
             instance = new DatabaseService(context.getApplicationContext());
 
         return instance;
     }
 
+    static class CityID {
+        public String owmID;
+        public String stateAirID;
+    }
 
     static class QueryService {
         private List<String> city = new ArrayList<>();
-        private List<String> id = new ArrayList<>();
+        private List<CityID> id = new ArrayList<>();
 
         private List<String> result = new ArrayList<>();
+
+        private char lastSlowPath = 0;
 
         private DatabaseService dbService;
 
         QueryService(Context context) {
             dbService = DatabaseService.getInstance(context);
+
         }
 
-        List<String> query(String text) {
-            if (text.isEmpty()) {
-                city.clear();
-                id.clear();
-                return city;
-            } else if (city.isEmpty()) {
-                QUERY_SLOW_PATH(text);
-                return city;
-            } else {
-                QUERY_FAST_PATH(text);
-                return result;
+        void query(String query) {
+            if (query.isEmpty()) {
+                result.clear();
+                lastSlowPath = 0;
+                return;
             }
 
+            if (city.size() > 0 && lastSlowPath == query.charAt(0)) {
+                QUERY_FAST_PATH(query);
+            } else {
+                QUERY_SLOW_PATH(query);
+            }
+
+            lastSlowPath = query.charAt(0);
+        }
+
+        List<String> getResult() {
+            return result;
         }
 
         void confirm(String c) {
@@ -113,34 +126,78 @@ public class DatabaseService {
             dbService.addID(city.get(idx), id.get(idx));
         }
 
-        private void QUERY_FAST_PATH(String text) {
-            result.clear();
-
-            for (String str : city) {
-                if (str.indexOf(text) == 0)
-                    result.add(str);
-
-            }
+        private boolean isPrefix(String string, String prefix) {
+            return string.toLowerCase().indexOf(prefix.toLowerCase()) == 0;
         }
 
-        private void QUERY_SLOW_PATH(String text) {
+        private void QUERY_FAST_PATH(String query) {
+            Long start = System.nanoTime();
+
+            result.clear();
+
+            for (String s : city) {
+                if (isPrefix(s, query))
+                    result.add(s);
+            }
+
+            Long end = System.nanoTime();
+            Log.d("QUERY_FAST_PATH", String.valueOf(end - start));
+        }
+
+        private void QUERY_SLOW_PATH(String query) {
+            Long start = System.nanoTime();
+
+            city.clear();
+            id.clear();
+            result.clear();
+
             SQLiteDatabase db = dbService.db;
 
             try (Cursor cr = db.query(DatabaseService.CITY_TABLE,
-                    new String[]{DatabaseService.CITY_COL},
+                    null,
                     DatabaseService.CITY_COL + " MATCH ?",
-                    new String[]{text + "*"},
+                    new String[]{query + "*"},
                     null, null, null)) {
 
                 if (cr.moveToFirst()) {
 
                     while (!cr.isAfterLast()) {
-                        city.add(cr.getString(cr.getColumnIndex(DatabaseService.CITY_COL)));
-                        id.add(cr.getString(cr.getColumnIndex(DatabaseService.OWM_ID_COL)));
+                        String c = cr.getString(cr.getColumnIndex(DatabaseService.CITY_COL));
+
+                        city.add(c);
+                        result.add(c);
+
+                        CityID cityID = new CityID();
+                        cityID.owmID = cr.getString(cr.getColumnIndex(DatabaseService.OWM_ID_COL));
+
+                        //only the following cities have state air id;
+                        switch (c) {
+                            case "Beijing":
+                                cityID.stateAirID = "1";
+                                break;
+                            case "Chengdu":
+                                cityID.stateAirID = "2";
+                                break;
+                            case "Guangzhou":
+                                cityID.stateAirID = "3";
+                                break;
+                            case "Shanghai":
+                                cityID.stateAirID = "4";
+                                break;
+                            case "Shenyang":
+                                cityID.stateAirID = "5";
+                                break;
+                        }
+
+                        id.add(cityID);
+
 
                         cr.moveToNext();
                     }
                 }
+
+                Long end = System.nanoTime();
+                Log.d("QUERY_SLOW_PATH", String.valueOf(end - start));
             }
 
         }

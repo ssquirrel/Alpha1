@@ -1,5 +1,7 @@
 package com.example.lxl_z.alpha1;
 
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +21,6 @@ import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
     static final String EXTRA_CITY = DatabaseService.CITY_COL;
-    static final String EXTRA_OWM_ID = DatabaseService.OWM_ID_COL;
 
     private RecyclerView.Adapter suggestionAdapter = new SuggestionAdapter();
 
@@ -42,6 +43,8 @@ public class SearchActivity extends AppCompatActivity {
         suggestion.setAdapter(suggestionAdapter);
 
         queryService = new DatabaseService.QueryService(this);
+
+        data = queryService.getResult();
     }
 
     @Override
@@ -60,7 +63,7 @@ public class SearchActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                data = queryService.query(newText);
+                queryService.query(newText);
 
                 if (newText.isEmpty() || !data.isEmpty()) {
                     resultEmptyText.setVisibility(View.INVISIBLE);
@@ -108,15 +111,19 @@ public class SearchActivity extends AppCompatActivity {
             super(v);
 
             city = (TextView) v.findViewById(R.id.suggestion);
+
+            v.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            int idx = this.getAdapterPosition();
-            String city = data.get(idx);
-
+            String city = data.get(this.getAdapterPosition());
 
             queryService.confirm(city);
+
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_CITY, city);
+            setResult(RESULT_OK, intent);
 
             finish();
         }

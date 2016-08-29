@@ -12,7 +12,8 @@
 
         </activity>
         <activity
-            android:name=".FavoritesActivity">
+            android:name=".FavoritesActivity"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

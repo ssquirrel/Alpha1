@@ -6,4 +6,9 @@ package com.example.lxl_z.alpha1.Weather;
 public class Request {
     public String city;
     public int rev;
+
+    public Request(String c){
+        city = c;
+        rev = 0;
+    }
 }
