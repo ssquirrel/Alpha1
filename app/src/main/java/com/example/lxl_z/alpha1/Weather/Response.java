@@ -7,11 +7,10 @@ import java.util.List;
  * Created by LXL_z on 8/27/2016.
  */
 public class Response {
-    public final String city;
+    public String city;
     public int rev;
 
-    public Weather current;
-    public List<Weather> forecast;
+    public List<Weather> weather;
     public List<AQI> aqi;
 
     public Response(String c) {
@@ -22,8 +21,7 @@ public class Response {
     public Response(Response r) {
         city = r.city;
         rev = r.rev;
-        current = new Weather(current);
-        forecast = new ArrayList<>(r.forecast);
-        aqi = new ArrayList<>(r.aqi);
+        weather = r.weather != null ? new ArrayList<>(r.weather) : null;
+        aqi = r.aqi != null ? new ArrayList<>(r.aqi) : null;
     }
 }

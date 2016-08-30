@@ -87,7 +87,7 @@ public class FavoritesActivity extends AppCompatActivity
             return;
 
 
-        current.set(idx, response.current);
+        current.set(idx, response.weather.get(0));
         //not every city has aqi
         if (response.aqi.size() > 0)
             aqi.set(idx, response.aqi.get(0));

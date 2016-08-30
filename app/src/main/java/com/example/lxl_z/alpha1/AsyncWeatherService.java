@@ -8,6 +8,7 @@ import android.util.Log;
 import com.example.lxl_z.alpha1.Weather.*;
 
 import java.lang.ref.WeakReference;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,12 +49,28 @@ public class AsyncWeatherService {
         return new AsyncWeatherTask(callback) {
             @Override
             protected boolean isUpdatePossible(Response response) {
+
+
                 return false;
             }
 
             @Override
             protected void doInBackground(Response response, DatabaseService.CityID id) {
 
+            }
+
+            private boolean isAqiUpdatePossible(List<AQI> aqi) {
+                if (aqi == null)
+                    return false;
+
+                Calendar calendar = Calendar.getInstance();
+                int hourNow = calendar.get(Calendar.HOUR_OF_DAY);
+                int minuteNow = calendar.get(Calendar.MINUTE);
+
+                calendar.setTimeInMillis(aqi.get(0).time);
+                int hourLastUpdate = calendar.get(Calendar.HOUR_OF_DAY);
+
+                return hourNow != hourLastUpdate && minuteNow < 30;
             }
         };
     }
@@ -73,19 +90,24 @@ public class AsyncWeatherService {
             weakCallback = new WeakReference<>(c);
         }
 
-        void execute(List<Request> requests) {
-            for (Request request : requests) {
-                Response response = cache.get(request.city);
+        void execute(List<Request> request) {
+            HttpTask[] tasks = new HttpTask[request.size()];
+
+            for (int i = 0; i < request.size(); i++) {
+                Response response = cache.get(request.get(i).city);
 
                 if (response == null) {
-                    response = new Response(request.city);
-
-                    cache.put(request.city, response);
+                    response = new Response(request.get(i).city);
+                    cache.put(request.get(i).city, response);
                 }
 
-                executor.execute(
-                        new HttpTask(response, dbService.getID(request.city))
-                );
+                tasks[i] = new HttpTask(response, dbService.getID(request.get(i).city));
+            }
+
+            lock.register(tasks);
+
+            for (HttpTask task : tasks) {
+                executor.execute(task);
             }
         }
 
@@ -93,6 +115,21 @@ public class AsyncWeatherService {
 
         protected abstract void doInBackground(final Response response,
                                                DatabaseService.CityID id);
+
+        private class MainThreadTask implements Runnable {
+            private OnLoadDoneCallback callback;
+            private Response response;
+
+            MainThreadTask(OnLoadDoneCallback cb, Response r) {
+                callback = cb;
+                response = r;
+            }
+
+            @Override
+            public void run() {
+                callback.onLoadDone(response);
+            }
+        }
 
         private class HttpTask implements Runnable, OrderedTagLock.TagRunnable {
             private Response response;
@@ -107,7 +144,7 @@ public class AsyncWeatherService {
             public void run() {
                 lock.lock(this);
 
-                final Response result;
+                Response result;
 
                 try {
                     lock.lock(this);
@@ -121,17 +158,11 @@ public class AsyncWeatherService {
                     lock.unlock(this);
                 }
 
-                final OnLoadDoneCallback strong = weakCallback.get();
-
+                OnLoadDoneCallback strong = weakCallback.get();
                 if (strong == null)
                     return;
 
-                mainThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        strong.onLoadDone(result);
-                    }
-                });
+                mainThreadHandler.post(new MainThreadTask(strong, result));
             }
 
             @Override
