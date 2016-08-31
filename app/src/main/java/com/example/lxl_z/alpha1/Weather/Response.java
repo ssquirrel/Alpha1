@@ -8,20 +8,13 @@ import java.util.List;
  */
 public class Response {
     public String city;
-    public int rev;
 
-    public List<Weather> weather;
+    public Weather weather;
     public List<AQI> aqi;
+    public List<Weather> forecast;
+
 
     public Response(String c) {
         city = c;
-        rev = 0;
-    }
-
-    public Response(Response r) {
-        city = r.city;
-        rev = r.rev;
-        weather = r.weather != null ? new ArrayList<>(r.weather) : null;
-        aqi = r.aqi != null ? new ArrayList<>(r.aqi) : null;
     }
 }

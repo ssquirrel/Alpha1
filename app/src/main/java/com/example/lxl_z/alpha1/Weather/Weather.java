@@ -8,4 +8,12 @@ public class Weather {
     public long time;
     public double temp;
 
+    public Weather() {
+
+    }
+
+    public Weather(Weather w) {
+        time = w.time;
+        temp = w.temp;
+    }
 }

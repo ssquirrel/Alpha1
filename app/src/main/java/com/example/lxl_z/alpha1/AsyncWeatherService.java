@@ -3,12 +3,12 @@ package com.example.lxl_z.alpha1;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.example.lxl_z.alpha1.Weather.*;
 
 import java.lang.ref.WeakReference;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class AsyncWeatherService {
 
     private OrderedTagLock lock = new OrderedTagLock();
 
-    private Map<String, Response> cache = new HashMap<>();
+    private Map<String, WeatherUpdateHelper> cache = new HashMap<>();
 
     private DatabaseService dbService;
 
@@ -48,35 +48,39 @@ public class AsyncWeatherService {
 
         return new AsyncWeatherTask(callback) {
             @Override
-            protected boolean isUpdatePossible(Response response) {
+            protected Response doInBackground(WeatherUpdateHelper helper) {
+                Response result = new Response(helper.city);
 
+                if (helper.id.stateAirID != null) {
+                    if (helper.aqiTimer.check())
+                        helper.aqiTimer.setAttemptResult(helper.updateAQI());
 
-                return false;
-            }
+                    result.aqi = Collections.singletonList(helper.aqi.get(0));
+                }
 
-            @Override
-            protected void doInBackground(Response response, DatabaseService.CityID id) {
+                if (helper.weatherTimer.check())
+                    helper.weatherTimer.setAttemptResult(helper.updateCurrentWeather());
 
-            }
+                result.weather = new Weather(helper.weather);
 
-            private boolean isAqiUpdatePossible(List<AQI> aqi) {
-                if (aqi == null)
-                    return false;
-
-                Calendar calendar = Calendar.getInstance();
-                int hourNow = calendar.get(Calendar.HOUR_OF_DAY);
-                int minuteNow = calendar.get(Calendar.MINUTE);
-
-                calendar.setTimeInMillis(aqi.get(0).time);
-                int hourLastUpdate = calendar.get(Calendar.HOUR_OF_DAY);
-
-                return hourNow != hourLastUpdate && minuteNow < 30;
+                return result;
             }
         };
     }
 
-    AsyncWeatherTask newDetailWeatherTask() {
-        return null;
+    AsyncWeatherTask newDetailWeatherTask(OnLoadDoneCallback callback) {
+        return new AsyncWeatherTask(callback) {
+            @Override
+            protected Response doInBackground(WeatherUpdateHelper helper) {
+
+
+                Response result = new Response(helper.city);
+                result.aqi = new ArrayList<>(helper.aqi);
+                result.weather = new Weather(helper.weather);
+                result.forecast = new ArrayList<>(helper.forecast);
+                return result;
+            }
+        };
     }
 
     interface OnLoadDoneCallback {
@@ -90,18 +94,21 @@ public class AsyncWeatherService {
             weakCallback = new WeakReference<>(c);
         }
 
-        void execute(List<Request> request) {
-            HttpTask[] tasks = new HttpTask[request.size()];
+        void execute(List<String> cities) {
+            HttpTask[] tasks = new HttpTask[cities.size()];
 
-            for (int i = 0; i < request.size(); i++) {
-                Response response = cache.get(request.get(i).city);
+            for (int i = 0; i < cities.size(); i++) {
+                WeatherUpdateHelper helper = cache.get(cities.get(i));
 
-                if (response == null) {
-                    response = new Response(request.get(i).city);
-                    cache.put(request.get(i).city, response);
+                if (helper == null) {
+                    helper = new WeatherUpdateHelper();
+                    helper.city = cities.get(i);
+                    helper.id = dbService.getID(cities.get(i));
+
+                    cache.put(cities.get(i), helper);
                 }
 
-                tasks[i] = new HttpTask(response, dbService.getID(request.get(i).city));
+                tasks[i] = new HttpTask(helper);
             }
 
             lock.register(tasks);
@@ -111,10 +118,7 @@ public class AsyncWeatherService {
             }
         }
 
-        protected abstract boolean isUpdatePossible(final Response response);
-
-        protected abstract void doInBackground(final Response response,
-                                               DatabaseService.CityID id);
+        protected abstract Response doInBackground(WeatherUpdateHelper scheduler);
 
         private class MainThreadTask implements Runnable {
             private OnLoadDoneCallback callback;
@@ -132,27 +136,22 @@ public class AsyncWeatherService {
         }
 
         private class HttpTask implements Runnable, OrderedTagLock.TagRunnable {
-            private Response response;
-            private DatabaseService.CityID id;
+            private WeatherUpdateHelper helper;
 
-            HttpTask(Response r, DatabaseService.CityID i) {
-                response = r;
-                id = i;
+            HttpTask(WeatherUpdateHelper rs) {
+                helper = rs;
             }
 
             @Override
             public void run() {
                 lock.lock(this);
 
-                Response result;
+                final Response result;
 
                 try {
                     lock.lock(this);
 
-                    if (isUpdatePossible(response))
-                        doInBackground(response, id);
-
-                    result = new Response(response);
+                    result = doInBackground(helper);
 
                 } finally {
                     lock.unlock(this);
@@ -167,7 +166,7 @@ public class AsyncWeatherService {
 
             @Override
             public String getTag() {
-                return response.city;
+                return helper.city;
             }
         }
     }

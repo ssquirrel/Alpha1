@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.example.lxl_z.alpha1.Weather.CityID;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +32,46 @@ public class DatabaseService {
     private Map<String, CityID> map = new HashMap<>();
 
     CityID getID(String city) {
-        return map.get(city);
+        CityID cityID = map.get(city);
+
+        if (cityID != null)
+            return cityID;
+
+        cityID = new CityID();
+
+        try (Cursor cr = db.query(DatabaseService.CITY_TABLE,
+                null,
+                DatabaseService.CITY_COL + " MATCH ?",
+                new String[]{city},
+                null, null, null)) {
+
+            cr.moveToFirst();
+
+            cityID.owmID = cr.getString(cr.getColumnIndex(DatabaseService.OWM_ID_COL));
+
+            //only the following cities have state air id;
+            switch (city) {
+                case "Beijing":
+                    cityID.stateAirID = "1";
+                    break;
+                case "Chengdu":
+                    cityID.stateAirID = "2";
+                    break;
+                case "Guangzhou":
+                    cityID.stateAirID = "3";
+                    break;
+                case "Shanghai":
+                    cityID.stateAirID = "4";
+                    break;
+                case "Shenyang":
+                    cityID.stateAirID = "5";
+                    break;
+            }
+        }
+
+        addID(city, cityID);
+
+        return cityID;
     }
 
     private DatabaseService(Context context) {
@@ -79,11 +120,6 @@ public class DatabaseService {
             instance = new DatabaseService(context.getApplicationContext());
 
         return instance;
-    }
-
-    static class CityID {
-        public String owmID;
-        public String stateAirID;
     }
 
     static class QueryService {
