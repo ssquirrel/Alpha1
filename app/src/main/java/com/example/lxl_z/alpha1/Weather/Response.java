@@ -13,7 +13,6 @@ public class Response {
     public List<AQI> aqi;
     public List<Weather> forecast;
 
-
     public Response(String c) {
         city = c;
     }

@@ -1,9 +1,6 @@
 package com.example.lxl_z.alpha1;
 
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.example.lxl_z.alpha1.Weather.DatabaseService;
+
 import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
