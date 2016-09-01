@@ -2,4 +2,5 @@
     <string name="app_name">Alpha1</string>
     <string name="search_bar_title">search</string>
     <string name="query_result_empty">No match found</string>
+
 </resources>
