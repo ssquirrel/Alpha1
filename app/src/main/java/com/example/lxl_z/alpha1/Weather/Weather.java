@@ -12,6 +12,12 @@ public class Weather {
 
     }
 
+    public Weather(long t, double tp) {
+        time = t;
+        temp = tp;
+    }
+
+
     public Weather(Weather w) {
         time = w.time;
         temp = w.temp;
