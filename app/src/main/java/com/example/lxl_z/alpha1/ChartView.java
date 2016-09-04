@@ -2,16 +2,13 @@ package com.example.lxl_z.alpha1;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,14 +17,14 @@ import java.util.List;
  */
 public class ChartView extends View {
     private List<DataPoint> data = Collections.emptyList();
+    private int data_max;
+    private int data_min;
 
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private Rect dimension = new Rect();
 
-    private int max;
-    private int min;
+    private float curveUpperBound = 0;
+    private float curveLowerBound = 0;
+    private float graphLowerBound = 0;
 
     public ChartView(Context ctx, AttributeSet attrs) {
         super(ctx, attrs);
@@ -36,17 +33,16 @@ public class ChartView extends View {
     public void refreshView(List<DataPoint> weather) {
         data = weather;
 
-        max = Integer.MIN_VALUE;
-        min = Integer.MAX_VALUE;
+        data_max = Integer.MIN_VALUE;
+        data_min = Integer.MAX_VALUE;
 
         for (DataPoint dp : data) {
-            if (dp.temp > max) {
-                max = dp.temp;
+            if (data_max < dp.temp) {
+                data_max = dp.temp;
             }
 
-            if (dp.temp < min)
-                min = dp.temp;
-
+            if (data_min > dp.temp)
+                data_min = dp.temp;
         }
 
         invalidate();
@@ -57,12 +53,15 @@ public class ChartView extends View {
                                  int h,
                                  int oldw,
                                  int oldh) {
-        x = getPaddingLeft();
-        y = getPaddingTop();
 
-        width = w - getPaddingLeft() - getPaddingRight();
-        height = h - getPaddingTop() - getPaddingBottom();
+        dimension.left = getPaddingLeft();
+        dimension.top = getPaddingTop();
+        dimension.right = w - getPaddingRight();
+        dimension.bottom = h - getPaddingBottom();
 
+        curveUpperBound = 0.2f * dimension.height();
+        curveLowerBound = 0.5f * dimension.height();
+        graphLowerBound = 0.6f * dimension.height();
     }
 
     @Override
@@ -82,37 +81,8 @@ public class ChartView extends View {
             canvas.drawRect(x, y, width, height, p);
         }
 */
-        {
-            int color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
 
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(color);
-            p.setStrokeCap(Paint.Cap.SQUARE);
-            p.setStrokeJoin(Paint.Join.ROUND);
-
-            float startX = x;
-            float MIN_H = (int) (height * 0.65);
-
-            float step = width / (data.size() - 1);
-
-            Path path = new Path();
-            path.moveTo(startX, MIN_H);
-            path.lineTo(startX, heightAt(0));
-
-            for (int i = 1; i < data.size() - 1; i++) {
-                startX += step;
-                path.lineTo(startX, heightAt(i));
-            }
-
-            startX += step;
-
-            path.lineTo(width, heightAt(data.size() - 1));
-            path.lineTo(width, MIN_H);
-            path.lineTo(x, MIN_H);
-
-            canvas.drawPath(path, p);
-        }
+        float step = dimension.width() / (data.size() - 2f);
 
         {
             int color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
@@ -120,129 +90,82 @@ public class ChartView extends View {
             Paint p = new Paint();
             p.setStyle(Paint.Style.FILL);
             p.setColor(color);
-
-            Path path = new Path();
-            path.moveTo(x, 0.65f * height);
-            path.lineTo(x, height * 0.8f);
-            path.lineTo(width, height * 0.8f);
-            path.lineTo(width, 0.65f * height);
-
-            canvas.drawPath(path, p);
-        }
-
-        {
-            int color = 0x14ffffff;
-
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(color);
             p.setStrokeCap(Paint.Cap.SQUARE);
             p.setStrokeJoin(Paint.Join.ROUND);
 
-            float startX = x;
-            float MIN_H = (int) (height * 0.65);
+            float startX = dimension.left;
 
-            float step = width / (data.size() - 1);
+            Path curve = new Path();
+            curve.moveTo(startX, (heightAt(0) + heightAt(1)) / 2);
+            curve.lineTo(startX += step / 2, heightAt(1));
 
-            Path path = new Path();
-            path.moveTo(startX, MIN_H);
-            path.lineTo(startX, heightAt(0));
-
-            for (int i = 1; i < data.size() - 1; i++) {
+            for (int i = 2; i < data.size() - 1; i++) {
                 startX += step;
-                path.lineTo(startX, heightAt(i));
+                curve.lineTo(startX, heightAt(i));
             }
 
-            path.lineTo(width, heightAt(data.size() - 1));
-            path.lineTo(width, MIN_H);
-            path.lineTo(x, MIN_H);
+            float midY = (heightAt(data.size() - 2) + heightAt(data.size() - 1)) / 2;
 
-            canvas.drawPath(path, p);
+            curve.lineTo(dimension.width(), midY);
+            curve.lineTo(dimension.width(), graphLowerBound);
+            curve.lineTo(dimension.left, graphLowerBound);
+            curve.close();
+
+            canvas.drawPath(curve, p);
         }
 
-        {
-            int color = 0x14ffffff;
-
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(color);
-
-            Path path = new Path();
-            path.moveTo(x, 0.65f * height);
-            path.lineTo(x, height * 0.8f);
-            path.lineTo(width, height * 0.8f);
-            path.lineTo(width, 0.65f * height);
-
-            canvas.drawPath(path, p);
-        }
-
-        {
-            int color = ContextCompat.getColor(getContext(), R.color.colorAccent);
-
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.STROKE);
-            p.setColor(color);
-            p.setStrokeCap(Paint.Cap.SQUARE);
-            p.setStrokeJoin(Paint.Join.ROUND);
-            p.setStrokeWidth(5);
-
-            float startX = x;
-
-            float step = width / (data.size() - 1);
-
-            Path path = new Path();
-            path.moveTo(startX, heightAt(0));
-
-            for (int i = 1; i < data.size(); i++) {
-                startX += step;
-                path.lineTo(startX, heightAt(i));
-            }
-
-            canvas.drawPath(path, p);
-        }
 
         {
             final int singleDp = getResources().getDimensionPixelSize(R.dimen.dp_px_scale);
 
             Paint p = new Paint();
             p.setStyle(Paint.Style.FILL);
+            p.setTextAlign(Paint.Align.CENTER);
             p.setColor(0x89000000);
             p.setTextSize(singleDp * 14);
 
-            float startX = x;
-            float startY = height;
+            Rect rect = new Rect();
+            p.getTextBounds("PM", 0, "PM".length(), rect);
 
-            float step = width / (data.size() - 1);
 
-            for (int i = 0; i < data.size() - 1; i++) {
-                Rect rect = new Rect();
-                String txt = String.valueOf(data.get(i).hour);
-                p.getTextBounds(txt, 0, txt.length(), rect);
+            float startX = dimension.left;
+            float startY = graphLowerBound;
 
-                canvas.drawText(txt, startX, startY - rect.bottom - 5 * singleDp, p);
+            canvas.drawText(data.get(1).time,
+                    (int) (startX += step / 2), (int) (startY + rect.height() + 5 * singleDp), p);
 
+            canvas.drawText(data.get(1).temp + "°",
+                    (int) (startX), (int) (heightAt(1) - 5 * singleDp), p);
+
+            for (int i = 2; i < data.size() - 1; i++) {
                 startX += step;
+
+                String time = data.get(i).time;
+
+                canvas.drawText(time, (int) startX, (int) (startY + rect.height() + 5 * singleDp), p);
+
+                String temp = data.get(i).temp + "°";
+
+                canvas.drawText(temp, (int) startX, (int) (heightAt(i) - 5 * singleDp), p);
             }
         }
 
     }
 
     static class DataPoint {
-        int hour;
+        String time;
         int temp;
 
-        DataPoint(int h, int t) {
-            hour = h;
+        DataPoint(String ti, int t) {
+            time = ti;
             temp = t;
         }
     }
 
-
-    private int heightAt(int idx) {
-        float MAX_H = (0.3f * height);
-        float MIN_H = (0.65f * height);
-
-
-        return (int) (MIN_H - (MIN_H - MAX_H) / (max - min) * (data.get(idx).temp - min));
+    // ub = (max - min)a + lb
+    //(ub-1b)/(max - min)(x-min) + lb
+    float heightAt(int idx) {
+        return (curveUpperBound - curveLowerBound) / (data_max - data_min) * (data.get(idx).temp - data_min) + curveLowerBound;
     }
+
 }

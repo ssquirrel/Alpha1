@@ -1,68 +1,249 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="8dp"
-
-    card_view:cardCornerRadius="4dp"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="24dp"
     tools:context=".DetailActivity">
+
+    <TextView
+        android:id="@+id/city"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Beijing"
+        android:textColor="#DC000000"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/time_and_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        android:text="Mon, 12:12PM, Clear"
+        android:textSize="14sp" />
+
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="16dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="16dp"
-        android:paddingTop="24dp">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/city"
+            android:id="@+id/temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Beijing"
-            android:textColor="#DC000000"
-            android:textSize="24sp" />
+            android:text="23°"
+            android:textSize="112sp" />
 
         <TextView
-            android:id="@+id/time_and_description"
+            android:id="@+id/f"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:text="Mon, 12:12PM, Clear"
+            android:paddingTop="10sp"
+            android:text=" feels like 28°C"
             android:textSize="14sp" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/temp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="23°"
-                android:textSize="112sp" />
-
-            <TextView
-                android:id="@+id/f"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="10sp"
-                android:text=" feels like 28°C"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <com.example.lxl_z.alpha1.ChartView
-            android:id="@+id/daily_forecast"
-            android:layout_width="match_parent"
-            android:layout_height="100dp" />
-
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+    <com.example.lxl_z.alpha1.ChartView
+        android:id="@+id/daily_forecast"
+        android:layout_width="match_parent"
+        android:layout_height="120dp" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+        <TableRow
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sunday"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ICON"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30  "
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="20sp" />
+        </TableRow>
+
+
+    </TableLayout>
+
+
+</LinearLayout>
+
 

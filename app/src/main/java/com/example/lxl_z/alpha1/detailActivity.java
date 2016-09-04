@@ -21,15 +21,15 @@ public class DetailActivity extends AppCompatActivity {
 
         List<ChartView.DataPoint> data = new ArrayList<>();
 
-        data.add(new ChartView.DataPoint(11, 36));
-        data.add(new ChartView.DataPoint(14, 37));
-        data.add(new ChartView.DataPoint(17, 35));
-        data.add(new ChartView.DataPoint(20, 26));
+        data.add(new ChartView.DataPoint("8 PM", 32));
+        data.add(new ChartView.DataPoint("11 PM", 33));
+        data.add(new ChartView.DataPoint("2 AM", 32));
+        data.add(new ChartView.DataPoint("5 AM", 28));
 
-        data.add(new ChartView.DataPoint(23, 22));
-        data.add(new ChartView.DataPoint(2, 20));
-        data.add(new ChartView.DataPoint(5, 18));
-        data.add(new ChartView.DataPoint(8, 26));
+        data.add(new ChartView.DataPoint("8 AM", 26));
+        data.add(new ChartView.DataPoint("11 AM", 24));
+        data.add(new ChartView.DataPoint("2 PM", 23));
+        data.add(new ChartView.DataPoint("2 PM", 27));
 
         dailyForecast.refreshView(data);
     }
