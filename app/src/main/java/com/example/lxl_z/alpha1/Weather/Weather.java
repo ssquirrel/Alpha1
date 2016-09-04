@@ -7,6 +7,8 @@ package com.example.lxl_z.alpha1.Weather;
 public class Weather {
     public long time;
     public double temp;
+    public String description;
+    public String icon;
 
     public Weather() {
 
