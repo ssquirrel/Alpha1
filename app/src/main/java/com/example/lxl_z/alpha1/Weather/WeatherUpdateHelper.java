@@ -239,7 +239,7 @@ public class WeatherUpdateHelper {
                         parseMain(reader, weather);
                         break;
                     case "dt":
-                        weather.time = reader.nextLong();
+                        weather.time = TimeUnit.SECONDS.toMillis(reader.nextLong());
                         break;
                     default:
                         reader.skipValue();

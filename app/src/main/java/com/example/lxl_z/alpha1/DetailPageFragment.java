@@ -63,12 +63,14 @@ public class DetailPageFragment extends Fragment
     public void onLoadDone(Response response) {
         Resources resources = getResources();
 
-        time.setText(String.format(resources.getString(R.string.time_string),
-                response.weather.time + TimeZone.getDefault().getRawOffset(),
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, h:mm a", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+0800"));
+
+        time.setText(resources.getString(R.string.time_string,
+                sdf.format(new Date(response.weather.time)),
                 response.weather.description));
 
-        temp.setText(String.format(resources.getString(R.string.temp_string),
-                (int) response.weather.temp));
+        temp.setText(resources.getString(R.string.temp_string, (int) response.weather.temp));
 
     }
 }
