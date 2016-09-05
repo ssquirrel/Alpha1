@@ -23,5 +23,7 @@ public class Weather {
     public Weather(Weather w) {
         time = w.time;
         temp = w.temp;
+        description = w.description;
+        icon = w.icon;
     }
 }

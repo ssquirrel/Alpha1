@@ -27,39 +27,47 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator on 8/31/2016.
  */
 public class WeatherUpdateHelper {
-    public UpdateTimer aqiTimer = new UpdateTimer(TimeUnit.HOURS.toMillis(1));
-    public UpdateTimer weatherTimer = new UpdateTimer(TimeUnit.HOURS.toMillis(1));
-    //public UpdateTimer forecast = new UpdateTimer(TimeUnit.DAYS.toMillis(1));
+    private UpdateTimer aqiTimer = new UpdateTimer(TimeUnit.HOURS.toMillis(1));
+    private UpdateTimer weatherTimer = new UpdateTimer(TimeUnit.HOURS.toMillis(1));
+    private UpdateTimer forecastTimer = new UpdateTimer(TimeUnit.DAYS.toMillis(1));
 
-    public List<AQI> updateAQI(String id, long time) {
+    public void updateAQI(Response response, String id) {
+        if (id == null)
+            return;
 
         if (aqiTimer.check()) {
             List<AQI> result = httpGetAQI(id);
 
-            boolean success = time != result.get(0).time;
+            if (response.aqi == null ||
+                    response.aqi.get(0).time != result.get(0).time)
+                response.aqi = result;
 
             aqiTimer.setAttemptResult(result.get(0).time);
-
-            if (success) {
-                return result;
-            }
         }
-        return null;
     }
 
-    public Weather updateCurrentWeather(String id, long time) {
+    public void updateCurrentWeather(Response response, String id) {
         if (weatherTimer.check()) {
             Weather result = httpGetWeather(id);
 
-            boolean success = time != result.time;
+            if (response.weather == null ||
+                    response.weather.time != result.time)
+                response.weather = result;
 
             weatherTimer.setAttemptResult(result.time);
-
-            if (success)
-                return result;
         }
+    }
 
-        return null;
+    public void updateForecast(Response response, String id) {
+        if (forecastTimer.check()) {
+            List<Weather> result = httpGetForecast(id);
+
+            if (response.forecast == null ||
+                    response.forecast.get(0).time != result.get(0).time)
+                response.forecast = result;
+
+            weatherTimer.setAttemptResult(result.get(0).time);
+        }
     }
 
     public static class UpdateTimer {
@@ -111,10 +119,9 @@ public class WeatherUpdateHelper {
 
             return conn.getInputStream();
         } catch (IOException e) {
-            Log.d("InputStream", e.getMessage());
+            //Log.d("InputStream", e.getMessage());
+            throw new RuntimeException("getHttpInputStream error");
         }
-
-        return null;
     }
 
     private static List<AQI> httpGetAQI(String id) {
@@ -164,11 +171,11 @@ public class WeatherUpdateHelper {
             return data;
 
         } catch (IOException e) {
-            Log.e("RssFetcher", "RssFetcher::parseInputStream::IOException");
+            Log.e("RssFetcher", e.toString());
         } catch (XmlPullParserException e) {
-            Log.e("RssFetcher", "RssFetcher::parseInputStream::XmlPullParserException");
+            Log.d("XmlPullParserException", e.toString());
         } catch (ParseException e) {
-            Log.e("RssFetcher", "RssFetcher::parseInputStream::ParseException");
+            Log.e("ParseException", e.toString());
         }
 
         return null;
@@ -181,41 +188,65 @@ public class WeatherUpdateHelper {
                 id +
                 "&units=metric&appid=a4b4bf207d40748201b495ef6528aaae";
 
-        InputStream in = getHttpInputStream(url.toString());
+        InputStream in = getHttpInputStream(url);
 
-        return WeatherJsonParser.parse(in);
+        Weather weather = new Weather();
+        try (JsonReader reader =
+                     new JsonReader(new BufferedReader(new InputStreamReader(in, "UTF-8")))) {
+
+            WeatherJsonParser.parse(reader, weather);
+
+        } catch (IOException e) {
+            Log.d("httpGetWeather", e.getMessage());
+        }
+
+        return weather;
+    }
+
+    private static List<Weather> httpGetForecast(String id) {
+        Log.d("httpGetForecast", System.currentTimeMillis() + "");
+
+        String url = "http://api.openweathermap.org/data/2.5/forecast?id=" +
+                id +
+                "&units=metric&appid=a4b4bf207d40748201b495ef6528aaae";
+
+
+        InputStream in = getHttpInputStream(url);
+
+        List<Weather> forecast = new ArrayList<>();
+        try (JsonReader reader =
+                     new JsonReader(new BufferedReader(new InputStreamReader(in, "UTF-8")))) {
+
+            ForecastJsonParser.parse(reader, forecast);
+
+        } catch (IOException e) {
+            Log.d("httpGetForecast", e.getMessage());
+        }
+
+        return forecast;
     }
 
     private static class WeatherJsonParser {
-        static Weather parse(InputStream in) {
-            Weather weather = new Weather();
+        static Weather parse(JsonReader reader, Weather weather) throws IOException {
+            reader.beginObject();
+            while (reader.hasNext()) {
 
-            try (JsonReader reader =
-                         new JsonReader(new BufferedReader(new InputStreamReader(in, "UTF-8")))) {
-
-                reader.beginObject();
-                while (reader.hasNext()) {
-
-                    switch (reader.nextName()) {
-                        case "weather":
-                            parseWeather(reader, weather);
-                            break;
-                        case "main":
-                            parseMain(reader, weather);
-                            break;
-                        case "dt":
-                            weather.time = reader.nextLong();
-                            break;
-                        default:
-                            reader.skipValue();
-                            break;
-                    }
+                switch (reader.nextName()) {
+                    case "weather":
+                        parseWeather(reader, weather);
+                        break;
+                    case "main":
+                        parseMain(reader, weather);
+                        break;
+                    case "dt":
+                        weather.time = reader.nextLong();
+                        break;
+                    default:
+                        reader.skipValue();
+                        break;
                 }
-                reader.endObject();
-
-            } catch (IOException e) {
-                Log.d("httpGetWeather", e.getMessage());
             }
+            reader.endObject();
 
             return weather;
         }
@@ -257,6 +288,38 @@ public class WeatherUpdateHelper {
             }
 
             reader.endObject();
+        }
+    }
+
+    private static class ForecastJsonParser {
+        static List<Weather> parse(JsonReader reader, List<Weather> forecast) throws IOException {
+            reader.beginObject();
+            while (reader.hasNext()) {
+
+                switch (reader.nextName()) {
+                    case "list":
+                        parseList(reader, forecast);
+                        break;
+                    default:
+                        reader.skipValue();
+                        break;
+                }
+            }
+            reader.endObject();
+
+            return forecast;
+        }
+
+        static List<Weather> parseList(JsonReader reader, List<Weather> forecast) throws IOException {
+            reader.beginArray();
+            while (reader.hasNext()) {
+                forecast.add(new Weather());
+
+                WeatherJsonParser.parse(reader, forecast.get(forecast.size() - 1));
+            }
+            reader.endArray();
+
+            return forecast;
         }
     }
 
@@ -324,7 +387,5 @@ public class WeatherUpdateHelper {
     }
 */
 
-    public static List<Weather> httpGetForecast(String id) {
-        return null;
-    }
+
 }

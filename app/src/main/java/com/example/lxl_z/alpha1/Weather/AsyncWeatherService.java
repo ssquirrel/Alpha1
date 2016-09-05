@@ -66,21 +66,9 @@ public class AsyncWeatherService {
             protected Response doInBackground(Response cached,
                                               CityID id,
                                               WeatherUpdateHelper helper) {
-                if (id.stateAirID != null) {
-                    List<AQI> update = helper.updateAQI(id.stateAirID,
-                            cached.aqi != null ? cached.aqi.get(0).time : 0);
 
-                    if (update != null)
-                        cached.aqi = update;
-                }
-
-                {
-                    Weather update = helper.updateCurrentWeather(id.owmID,
-                            cached.weather != null ? cached.weather.time : 0);
-
-                    if (update != null)
-                        cached.weather = update;
-                }
+                helper.updateAQI(cached, id.stateAirID);
+                helper.updateCurrentWeather(cached, id.owmID);
 
                 Response response = new Response(cached.city);
 
@@ -96,19 +84,22 @@ public class AsyncWeatherService {
     public AsyncWeatherTask newDetailWeatherTask(OnLoadDoneCallback callback) {
         return new AsyncWeatherTask(callback) {
             @Override
-            protected Response doInBackground(Response response,
+            protected Response doInBackground(Response cached,
                                               CityID id,
                                               WeatherUpdateHelper helper) {
+                helper.updateAQI(cached, id.stateAirID);
+                helper.updateCurrentWeather(cached, id.owmID);
+                helper.updateForecast(cached, id.owmID);
 
-                /*
-                Response result = new Response(helper.city);
-                result.aqi = new ArrayList<>(helper.aqi);
-                result.weather = new Weather(helper.weather);
-                result.forecast = new ArrayList<>(helper.forecast);
+
+                Response result = new Response(cached.city);
+
+                if (cached.aqi != null)
+                    result.aqi = new ArrayList<>(cached.aqi);
+
+                result.weather = new Weather(cached.weather);
+                result.forecast = new ArrayList<>(cached.forecast);
                 return result;
-                */
-
-                return null;
             }
         };
     }

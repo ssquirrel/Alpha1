@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,6 +38,9 @@ public class FavoritesActivity extends AppCompatActivity
         implements AsyncWeatherService.OnLoadDoneCallback {
     private static final int PICK_FAVORITES_REQUEST = 0;
     private static final String FAVORITES_LIST = "FAVORITES_LIST.txt";
+
+    static final String EXTRA_FAVORITES = FAVORITES_LIST;
+    static final String EXTRA_INDEX = "EXTRA_INDEX";
 
     private RecyclerView.Adapter favoritesAdapter;
     private ItemTouchHelper itemTouchHelper;
@@ -174,7 +178,11 @@ public class FavoritesActivity extends AppCompatActivity
 
         @Override
         public void onClick(View v) {
+            Intent intent = new Intent(FavoritesActivity.this, DetailActivity.class);
+            intent.putStringArrayListExtra(EXTRA_FAVORITES, (ArrayList<String>) cities);
+            intent.putExtra(EXTRA_INDEX, getAdapterPosition());
 
+            startActivity(intent);
         }
 
         public boolean onTouch(View v, MotionEvent event) {

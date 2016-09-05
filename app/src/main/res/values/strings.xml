@@ -3,4 +3,6 @@
     <string name="search_bar_title">search</string>
     <string name="query_result_empty">No match found</string>
 
+    <string name="time_string">%1$ta, %1$tI:%1$tM %1$Tp, %2$s</string>
+    <string name="temp_string">%1$s°</string>
 </resources>
