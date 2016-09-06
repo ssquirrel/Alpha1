@@ -122,7 +122,7 @@ public class ChartView extends View {
             p.setStyle(Paint.Style.FILL);
             p.setTextAlign(Paint.Align.CENTER);
             p.setColor(0x89000000);
-            p.setTextSize(singleDp * 14);
+            p.setTextSize(singleDp * 12);
 
             Rect rect = new Rect();
             p.getTextBounds("PM", 0, "PM".length(), rect);

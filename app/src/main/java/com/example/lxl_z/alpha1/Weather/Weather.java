@@ -26,4 +26,8 @@ public class Weather {
         description = w.description;
         icon = w.icon;
     }
+
+    public int getRoundedTemp() {
+        return Math.round((float) temp);
+    }
 }

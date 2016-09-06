@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +37,14 @@ public class WeatherUpdateHelper {
             return;
 
         if (aqiTimer.check()) {
+            Long TIME = System.currentTimeMillis();
+            Log.d("updateAQI", response.city + " begins at " + TIME);
+
             List<AQI> result = httpGetAQI(id);
+
+            Log.d("httpGetAQI", response.city + " took " + (System.currentTimeMillis() - TIME));
+
+
 
             if (response.aqi == null ||
                     response.aqi.get(0).time != result.get(0).time)
@@ -48,7 +56,12 @@ public class WeatherUpdateHelper {
 
     public void updateCurrentWeather(Response response, String id) {
         if (weatherTimer.check()) {
+            Long TIME = System.currentTimeMillis();
+            Log.d("updateCurrentWeather", response.city + " begins at " + TIME);
+
             Weather result = httpGetWeather(id);
+
+            Log.d("updateCurrentWeather", response.city + " took " + (System.currentTimeMillis() - TIME));
 
             if (response.weather == null ||
                     response.weather.time != result.time)
@@ -60,7 +73,12 @@ public class WeatherUpdateHelper {
 
     public void updateForecast(Response response, String id) {
         if (forecastTimer.check()) {
+            Long TIME = System.currentTimeMillis();
+            Log.d("updateForecast", response.city + " begins at " + TIME);
+
             List<Weather> result = httpGetForecast(id);
+
+            Log.d("updateForecast", response.city + " took " + (System.currentTimeMillis() - TIME));
 
             if (response.forecast == null ||
                     response.forecast.get(0).time != result.get(0).time)
@@ -120,13 +138,11 @@ public class WeatherUpdateHelper {
             return conn.getInputStream();
         } catch (IOException e) {
             //Log.d("InputStream", e.getMessage());
-            throw new RuntimeException("getHttpInputStream error");
+            throw new RuntimeException(e.toString());
         }
     }
 
     private static List<AQI> httpGetAQI(String id) {
-        Log.d("httpGetAQI", System.currentTimeMillis() + "");
-
         try (InputStream in =
                      getHttpInputStream("http://www.stateair.net/web/rss/1/" + id + ".xml")) {
 
@@ -135,7 +151,7 @@ public class WeatherUpdateHelper {
 
             int count = 0;
 
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss aa");
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss aa", Locale.US);
 
 
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -167,7 +183,6 @@ public class WeatherUpdateHelper {
                 }
 
             }
-
             return data;
 
         } catch (IOException e) {
@@ -182,8 +197,6 @@ public class WeatherUpdateHelper {
     }
 
     private static Weather httpGetWeather(String id) {
-        Log.d("httpGetWeather", System.currentTimeMillis() + "");
-
         String url = "http://api.openweathermap.org/data/2.5/weather?id=" +
                 id +
                 "&units=metric&appid=a4b4bf207d40748201b495ef6528aaae";
@@ -199,13 +212,10 @@ public class WeatherUpdateHelper {
         } catch (IOException e) {
             Log.d("httpGetWeather", e.getMessage());
         }
-
         return weather;
     }
 
     private static List<Weather> httpGetForecast(String id) {
-        Log.d("httpGetForecast", System.currentTimeMillis() + "");
-
         String url = "http://api.openweathermap.org/data/2.5/forecast?id=" +
                 id +
                 "&units=metric&appid=a4b4bf207d40748201b495ef6528aaae";
