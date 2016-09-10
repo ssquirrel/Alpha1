@@ -1,611 +1,381 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    <!--
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:paddingEnd="16dp"
-            android:paddingStart="16dp"
-            android:text="Beijing"
-            android:textColor="@android:color/primary_text_light"
-            android:textSize="24sp" />
-    -->
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
+            android:layout_height="142dp"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="32°"
+                android:textSize="112sp" />
+
+            <ImageView
+                android:layout_width="142dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/a101" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:layout_width="176dp"
+                android:layout_height="wrap_content"
+                android:text="Feels like"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30°"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:layout_width="176dp"
+                android:layout_height="wrap_content"
+                android:text="AQI"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="55"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:orientation="horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:layout_width="176dp"
+                android:layout_height="wrap_content"
+                android:text="Chance of Rain"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+
+            android:orientation="horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
+
+            <TextView
+                android:layout_width="176dp"
+                android:layout_height="wrap_content"
+                android:text="Humidity"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="89°"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.example.lxl_z.alpha1.ChartView
+                android:id="@+id/hourly_forecast"
+                android:layout_width="match_parent"
+                android:layout_height="112dp"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="bottom"
+                android:background="#1c000000" />
+        </FrameLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <!--
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="24dp"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp"
-                            android:text="Fri, 4:16PM, overcast clouds"
-                            android:textSize="16sp" />
-            -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="142dp"
-                android:orientation="horizontal"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp"
-                android:paddingTop="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="32°"
-                    android:textSize="112sp" />
-
-                <ImageView
-                    android:layout_width="142dp"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/a101" />
-            </LinearLayout>
+            android:layout_marginTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp">
+                android:id="@+id/weekday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="176dp"
-                    android:layout_height="wrap_content"
-                    android:text="Feels like"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Saturday"
                     android:textSize="20sp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Sunday"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Monday"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Tuesday"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Wednesday"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Thursday"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="48dp"
+                    android:paddingTop="8dp"
+                    android:text="Friday"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/weekday"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a100" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a101" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a102" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a101" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a100" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a101" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/a104" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/min_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:enabled="false"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="20°"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/max_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/min_temp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
+                    android:text="30°"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="8dp"
                     android:text="30°"
                     android:textSize="20sp" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:orientation="horizontal"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp">
+        </RelativeLayout>
 
-                <TextView
-                    android:layout_width="176dp"
-                    android:layout_height="wrap_content"
-                    android:text="AQI"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="55"
-                    android:textSize="20sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:orientation="horizontal"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp">
-
-                <TextView
-                    android:layout_width="176dp"
-                    android:layout_height="wrap_content"
-                    android:text="Chance of Rain"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0%"
-                    android:textSize="20sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-
-                android:orientation="horizontal"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp">
-
-                <TextView
-                    android:layout_width="176dp"
-                    android:layout_height="wrap_content"
-                    android:text="Humidity"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="89°"
-                    android:textSize="20sp" />
-
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.example.lxl_z.alpha1.ChartView
-                    android:id="@+id/hourly_forecast"
-                    android:layout_width="match_parent"
-                    android:layout_height="112dp"
-                    android:paddingEnd="16dp"
-                    android:paddingStart="16dp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_gravity="bottom"
-                    android:background="#1c000000" />
-            </FrameLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp">
-
-                <LinearLayout
-                    android:id="@+id/weekday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Saturday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Sunday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Monday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Tuesday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Wednesday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Thursday"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="176dp"
-                        android:layout_height="48dp"
-                        android:paddingTop="8dp"
-                        android:text="Friday"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/weekday"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a100" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a101" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a102" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a101" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a100" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a101" />
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:padding="4dp"
-                        android:src="@drawable/a104" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/min_temp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="20°"
-                        android:textSize="20sp" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/max_temp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/min_temp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-
-                    <TextView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center_horizontal"
-                        android:paddingTop="8dp"
-                        android:text="30°"
-                        android:textSize="20sp" />
-                </LinearLayout>
-
-            </RelativeLayout>
-
-
-            <!--
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="16dp"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="176dp"
-                                android:layout_height="wrap_content"
-                                android:text="Saturday"
-                                android:textSize="20sp" />
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/a100" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </RelativeLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Sunday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Monday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Tuesday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Wednesday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Thursday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="8dp"
-                            android:orientation="horizontal"
-                            android:paddingEnd="16dp"
-                            android:paddingStart="16dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Friday"
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="30° "
-                                android:textSize="20sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:enabled="false"
-                                android:text="20°"
-                                android:textSize="20sp" />
-                        </LinearLayout>
-                        -->
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
