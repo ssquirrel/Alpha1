@@ -16,8 +16,7 @@
             android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".DetailActivity" />
 
-        <activity
-            android:name=".FavoritesActivity_beta">
+        <activity android:name=".FavoritesActivity_beta">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +25,8 @@
         </activity>
 
         <activity
-            android:name=".DetailActivity_beta" />
+            android:name=".DetailActivity_beta"
+            android:parentActivityName=".FavoritesActivity_beta" />
 
     </application>
 

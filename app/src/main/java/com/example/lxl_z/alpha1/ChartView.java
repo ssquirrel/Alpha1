@@ -61,7 +61,7 @@ public class ChartView extends View {
 
         curveUpperBound = 0.2f * dimension.height();
         curveLowerBound = 0.5f * dimension.height();
-        graphLowerBound = 0.6f * dimension.height();
+        graphLowerBound = 0.75f * dimension.height();
     }
 
     @Override
@@ -69,16 +69,16 @@ public class ChartView extends View {
         //
         if (data.size() == 0)
             return;
-       /*
+/*
         {
-            int color = ContextCompat.getColor(getContext(), R.color.colorPrimary);
+            int color = 0xff000000;
             Paint p = new Paint();
             p.setStyle(Paint.Style.FILL);
             p.setColor(color);
             p.setStrokeCap(Paint.Cap.SQUARE);
             p.setStrokeJoin(Paint.Join.ROUND);
 
-            canvas.drawRect(x, y, width, height, p);
+            canvas.drawRect(dimension, p);
         }
 */
 
@@ -106,8 +106,8 @@ public class ChartView extends View {
 
             float midY = (heightAt(data.size() - 2) + heightAt(data.size() - 1)) / 2;
 
-            curve.lineTo(dimension.width(), midY);
-            curve.lineTo(dimension.width(), graphLowerBound);
+            curve.lineTo(dimension.right, midY);
+            curve.lineTo(dimension.right, graphLowerBound);
             curve.lineTo(dimension.left, graphLowerBound);
             curve.close();
 

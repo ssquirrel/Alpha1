@@ -13,7 +13,9 @@ public class DetailActivity_beta extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_beta);
 
-        setTitle("Beijing");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Beijing");
+        getSupportActionBar().setSubtitle("Fri, 4:16PM, overcast clouds");
 
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
@@ -30,13 +32,16 @@ public class DetailActivity_beta extends AppCompatActivity {
 
         pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
-            public void onPageSelected(int position) {
-                if(position == 0)
-                    setTitle("Beijing");
-                else
-                    setTitle("Shanghai");
+            public void onPageSelected(int state) {
+                if (state == 0) {
+                    getSupportActionBar().setTitle("Beijing");
+                    getSupportActionBar().setSubtitle("Fri, 4:16PM, overcast clouds");
+                }
+                else {
+                    getSupportActionBar().setTitle("Shanghai");
+                    getSupportActionBar().setSubtitle("Fri, 4:10PM, overcast clouds");
+                }
             }
         });
-
     }
 }
