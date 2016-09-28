@@ -1,45 +1,43 @@
 package com.example.lxl_z.alpha1;
 
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.lxl_z.alpha1.Weather.AsyncWeatherService;
+import com.example.lxl_z.alpha1.Weather.HeWeather;
 import com.example.lxl_z.alpha1.Weather.Response;
-import com.example.lxl_z.alpha1.Weather.Weather;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 9/5/2016.
  */
-public class DetailPageFragment extends Fragment
-        implements AsyncWeatherService.OnLoadDoneCallback {
+public class DetailPageFragment extends EmptyStateDetailFragment
+        implements AsyncWeatherService.OnLoadDoneListener {
+    String city;
 
-    TextView city;
-    TextView time;
     TextView temp;
+    ImageView icon;
+    TextView relativeTemp;
+    TextView aqi;
+    TextView precipitation;
+    TextView humidity;
 
     ChartView chartView;
 
-    TableLayout table;
+    private TextView daysOfWeak[];
+    private ImageView forecastIcons[];
+    private TextView maxTemps[];
+    private TextView minTemps[];
 
-    AsyncWeatherService.AsyncWeatherTask task;
+    AsyncWeatherService.AsyncWeather asyncWeather;
 
     public DetailPageFragment() {
 
@@ -56,106 +54,107 @@ public class DetailPageFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        String cc = getArguments().getString(SearchActivity.EXTRA_CITY);
+        final View view = getView();
 
-        city = (TextView) getView().findViewById(R.id.city);
-        time = (TextView) getView().findViewById(R.id.time_and_description);
-        temp = (TextView) getView().findViewById(R.id.temp);
+        temp = (TextView) view.findViewById(R.id.temp);
+        icon = (ImageView) view.findViewById(R.id.icon);
+        relativeTemp = (TextView) view.findViewById(R.id.relative_temp);
+        aqi = (TextView) view.findViewById(R.id.aqi);
+        precipitation = (TextView) view.findViewById(R.id.precipitation);
+        humidity = (TextView) view.findViewById(R.id.humidity);
 
-        chartView = (ChartView) getView().findViewById(R.id.hourly_forecast);
+        chartView = (ChartView) view.findViewById(R.id.hourly_chart);
 
-        table = (TableLayout) getView().findViewById(R.id.forecast_table);
 
-        city.setText(cc);
+        LinearLayout forecastContainer = (LinearLayout) view.findViewById(R.id.daily_forecast);
+        final int LENGTH = forecastContainer.getChildCount();
 
-        task = AsyncWeatherService.getInstance(getContext()).newDetailWeatherTask(this);
-        task.execute(Collections.singletonList(cc));
+
+        daysOfWeak = new TextView[LENGTH];
+        forecastIcons = new ImageView[LENGTH];
+        maxTemps = new TextView[LENGTH];
+        minTemps = new TextView[LENGTH];
+
+
+        for (int i = 0; i < LENGTH; i++) {
+            LinearLayout ll = (LinearLayout) forecastContainer.getChildAt(i);
+
+            daysOfWeak[i] = (TextView) ll.getChildAt(0);
+            forecastIcons[i] = (ImageView) ll.getChildAt(1);
+            maxTemps[i] = (TextView) ll.getChildAt(2);
+            minTemps[i] = (TextView) ll.getChildAt(3);
+        }
+
+        city = getArguments().getString(DetailActivity.EXTRA_CITY);
+
+        asyncWeather =
+                AsyncWeatherService.getInstance(getContext()).getAsyncWeather(this);
+
+        error.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadingState();
+                asyncWeather.force(Collections.singletonList(city));
+            }
+        });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getState() == EmptyStateDetailFragment.ERROR) {
+            loadingState();
+        }
+
+        asyncWeather.fetch(Collections.singletonList(city));
     }
 
     @Override
     public void onLoadDone(Response response) {
-        Resources resources = getResources();
+        if (!isAdded())
+            return;
 
-        TimeZone TIMEZONE_CST = TimeZone.getTimeZone("GMT+0800");
+        if (!response.isValid) {
+            errorState();
+            return;
+        }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, h:mm a", Locale.US);
-        sdf.setTimeZone(TIMEZONE_CST);
+        okState();
 
-        time.setText(resources.getString(R.string.time_string,
-                sdf.format(response.weather.time),
-                response.weather.description));
+        AsyncWeatherService.OnLoadDoneListener listener =
+                (AsyncWeatherService.OnLoadDoneListener) getActivity();
 
-        temp.setText(resources.getString(R.string.temp_string, response.weather.getRoundedTemp()));
+        listener.onLoadDone(response);
 
-        List<ChartView.DataPoint> data = new ArrayList<>();
-        data.add(new ChartView.DataPoint(null, response.weather.getRoundedTemp()));
 
-        sdf.applyPattern("h:mm a");
+        List<ChartView.DataPoint> dataPoints = new ArrayList<>();
+        dataPoints.add(new ChartView.DataPoint(null, response.heWeather.temp));
+
         for (int i = 0; i < 7; i++) {
-            Weather forecast = response.forecast.get(i);
-
-            data.add(new ChartView.DataPoint(sdf.format(forecast.time), forecast.getRoundedTemp()));
+            ChartView.DataPoint dp =
+                    new ChartView.DataPoint(response.owmForecast.hourly.get(i).time,
+                            response.owmForecast.hourly.get(i).temp);
+            dataPoints.add(dp);
         }
 
-        chartView.refreshView(data);
+        chartView.refreshView(dataPoints);
 
+        temp.setText(getString(R.string.temp_string, response.heWeather.temp));
+        icon.setImageResource(response.heWeather.iconResId);
+        relativeTemp.setText(getString(R.string.temp_string, response.heWeather.relativeTemp));
+        aqi.setText(String.valueOf(response.heWeather.aqi));
+        precipitation.setText(getString(R.string.percent_string, response.heWeather.precipitation));
+        humidity.setText(getString(R.string.percent_string, response.heWeather.humidity));
 
-        Calendar calendar = Calendar.getInstance(TIMEZONE_CST);
+        for (int i = 0; i < forecastIcons.length; i++) {
+            HeWeather.DailyForecast forecast = response.heWeather.daily.get(i);
 
-        calendar.setTimeInMillis(response.forecast.get(response.forecast.size() - 1).time);
-        int LAST_DAY_OF_WEEK = calendar.get(Calendar.DAY_OF_WEEK);
-
-        calendar.setTimeInMillis(response.weather.time);
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-
-        int idx = 0;
-
-        for (; idx < response.forecast.size(); idx++) {
-            calendar.setTimeInMillis(response.forecast.get(idx).time);
-
-            if (day != calendar.get(Calendar.DAY_OF_WEEK))
-                break;
+            daysOfWeak[i].setText(forecast.dayOfWeak);
+            forecastIcons[i].setImageResource(forecast.iconResId);
+            maxTemps[i].setText(getString(R.string.temp_string, forecast.max));
+            minTemps[i].setText(getString(R.string.temp_string, forecast.min));
         }
-
-        day = calendar.get(Calendar.DAY_OF_WEEK);
-
-        for (int i = 0; i < table.getChildCount(); i++) {
-            TableRow row = (TableRow) table.getChildAt(i);
-
-            if (idx == response.forecast.size())
-                break;
-
-            ((TextView) row.getChildAt(0)).setText(
-                    calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.US));
-
-            int temp_max = Integer.MIN_VALUE;
-            int temp_min = Integer.MAX_VALUE;
-
-            for (; idx < response.forecast.size(); idx++) {
-                calendar.setTimeInMillis(response.forecast.get(idx).time);
-
-                if (day != calendar.get(Calendar.DAY_OF_WEEK))
-                    break;
-
-                int temp = response.forecast.get(idx).getRoundedTemp();
-
-                if (temp_max < temp) {
-                    temp_max = temp;
-                }
-
-                if (temp_min > temp)
-                    temp_min = temp;
-            }
-
-            ((TextView) row.getChildAt(1)).setText(String.valueOf(temp_max + " "));
-            ((TextView) row.getChildAt(2)).setText(String.valueOf(temp_min));
-
-            day = calendar.get(Calendar.DAY_OF_WEEK);
-
-            if (day == LAST_DAY_OF_WEEK)
-                break;
-        }
-
-
     }
+
 }

@@ -9,6 +9,8 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.example.lxl_z.alpha1.Weather.HeWeather;
+
 import java.util.Collections;
 import java.util.List;
 

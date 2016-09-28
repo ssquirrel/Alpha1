@@ -1,41 +1,28 @@
 package com.example.lxl_z.alpha1;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.lxl_z.alpha1.Weather.AQI;
 import com.example.lxl_z.alpha1.Weather.AsyncWeatherService;
+import com.example.lxl_z.alpha1.Weather.DatabaseService;
 import com.example.lxl_z.alpha1.Weather.Response;
-import com.example.lxl_z.alpha1.Weather.Weather;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class FavoritesActivity extends AppCompatActivity
-        implements AsyncWeatherService.OnLoadDoneCallback {
+        implements AsyncWeatherService.OnLoadDoneListener {
     private static final int PICK_FAVORITES_REQUEST = 0;
     private static final String FAVORITES_LIST = "FAVORITES_LIST.txt";
 
@@ -45,11 +32,13 @@ public class FavoritesActivity extends AppCompatActivity
     private RecyclerView.Adapter favoritesAdapter;
     private ItemTouchHelper itemTouchHelper;
 
-    List<String> cities = new ArrayList<>();
-    List<AQI> aqi = new ArrayList<>();
-    List<Weather> weather = new ArrayList<>();
+    List<String> cities;
+    List<Integer> temps;
+    List<Integer> iconResIds;
 
-    AsyncWeatherService.AsyncWeatherTask task;
+    AsyncWeatherService.AsyncWeather task;
+
+    DatabaseService.PersistenceService pService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,30 +63,15 @@ public class FavoritesActivity extends AppCompatActivity
             }
         });
 
-        task = AsyncWeatherService.getInstance(this).newCurrentWeatherTask(this);
+        task = AsyncWeatherService.getInstance(this).getAsyncWeather(this);
 
-        if (Arrays.asList(fileList()).contains(FAVORITES_LIST)) {
-            try (
-                    FileInputStream fis = openFileInput(FAVORITES_LIST);
-                    BufferedReader br = new BufferedReader(new InputStreamReader(fis))
-            ) {
-                String city;
+        pService = new DatabaseService.PersistenceService(this);
+        cities = pService.restore();
 
-                while ((city = br.readLine()) != null) {
-                    cities.add(city);
-                    aqi.add(null);
-                    weather.add(null);
-                }
+        List<Integer> initializer = Collections.nCopies(cities.size(), null);
 
-                if (cities.size() > 0) {
-                    favoritesAdapter.notifyDataSetChanged();
-                }
-
-            } catch (IOException e) {
-                Log.d("Selection:onCreate", e.getMessage());
-            }
-        }
-
+        temps = new ArrayList<>(initializer);
+        iconResIds = new ArrayList<>(initializer);
     }
 
 
@@ -106,7 +80,7 @@ public class FavoritesActivity extends AppCompatActivity
         super.onResume();
 
         if (cities.size() > 0)
-            task.execute(cities);
+            task.fetch(cities);
 
     }
 
@@ -114,19 +88,7 @@ public class FavoritesActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
 
-        try (FileOutputStream fos = openFileOutput(FAVORITES_LIST, Context.MODE_PRIVATE);
-             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
-        ) {
-
-            for (String city : cities) {
-                out.write(city);
-                out.newLine();
-            }
-
-        } catch (Exception e) {
-            Log.d("Selection:onPause", e.getMessage());
-        }
-
+        pService.save(cities);
     }
 
     @Override
@@ -138,8 +100,8 @@ public class FavoritesActivity extends AppCompatActivity
                 return;
 
             cities.add(city);
-            aqi.add(null);
-            weather.add(null);
+            temps.add(null);
+            iconResIds.add(null);
         }
     }
 
@@ -150,29 +112,34 @@ public class FavoritesActivity extends AppCompatActivity
         if (idx == -1)
             return;
 
-        weather.set(idx, response.weather);
-        //not every city has aqi
-        if (response.aqi != null)
-            aqi.set(idx, response.aqi.get(0));
+        if (!response.isValid) {
+            temps.set(idx, null);
+            iconResIds.set(idx, null);
+            favoritesAdapter.notifyItemChanged(idx);
+            return;
+        }
 
+        if (temps.get(idx) != null && temps.get(idx) == response.heWeather.temp)
+            return;
+
+        temps.set(idx, response.heWeather.temp);
+        iconResIds.set(idx, response.heWeather.iconResId);
         favoritesAdapter.notifyItemChanged(idx);
     }
 
     private class SearchSuggestionView extends RecyclerView.ViewHolder
-            implements View.OnClickListener, View.OnTouchListener {
+            implements View.OnClickListener {
         TextView city;
         TextView temp;
-        TextView aqi;
-        View handle;
+        ImageView icon;
 
         SearchSuggestionView(View v) {
             super(v);
 
             city = (TextView) v.findViewById(R.id.city);
             temp = (TextView) v.findViewById(R.id.temp);
-            aqi = (TextView) v.findViewById(R.id.aqi);
-            handle = v.findViewById(R.id.handle);
-            handle.setOnTouchListener(this);
+            icon = (ImageView) v.findViewById(R.id.icon);
+
             v.setOnClickListener(this);
         }
 
@@ -183,15 +150,6 @@ public class FavoritesActivity extends AppCompatActivity
             intent.putExtra(EXTRA_INDEX, getAdapterPosition());
 
             startActivity(intent);
-        }
-
-        public boolean onTouch(View v, MotionEvent event) {
-            if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
-                itemTouchHelper.startDrag(this);
-            }
-
-
-            return true;
         }
     }
 
@@ -207,15 +165,15 @@ public class FavoritesActivity extends AppCompatActivity
         public void onBindViewHolder(SearchSuggestionView holder, int position) {
             holder.city.setText(cities.get(position));
 
-            if (aqi.get(position) != null)
-                holder.aqi.setText(String.valueOf(aqi.get(position).aqi));
-            else
-                holder.aqi.setText("");
-
-            if (weather.get(position) != null)
-                holder.temp.setText(String.valueOf(weather.get(position).temp));
+            if (temps.get(position) != null)
+                holder.temp.setText(getString(R.string.temp_string, temps.get(position)));
             else
                 holder.temp.setText("");
+
+            if (temps.get(position) != null)
+                holder.icon.setImageResource(iconResIds.get(position));
+            else
+                holder.icon.setImageDrawable(null);
         }
 
         @Override
@@ -236,8 +194,8 @@ public class FavoritesActivity extends AppCompatActivity
             int target = viewHolder.getAdapterPosition();
 
             cities.remove(target);
-            aqi.remove(target);
-            weather.remove(target);
+            temps.remove(target);
+            iconResIds.remove(target);
 
             favoritesAdapter.notifyItemRemoved(target);
         }
@@ -251,17 +209,12 @@ public class FavoritesActivity extends AppCompatActivity
             int to = target.getAdapterPosition();
 
             Collections.swap(cities, from, to);
-            Collections.swap(aqi, from, to);
-            Collections.swap(weather, from, to);
+            Collections.swap(temps, from, to);
+            Collections.swap(iconResIds, from, to);
 
             favoritesAdapter.notifyItemMoved(from, to);
 
             return true;
-        }
-
-        @Override
-        public boolean isLongPressDragEnabled() {
-            return false;
         }
     }
 }

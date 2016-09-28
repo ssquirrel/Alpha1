@@ -1,156 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingBottom="16dp"
-    android:paddingEnd="16dp"
-    android:paddingStart="16dp"
-    android:paddingTop="24dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/city"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="?android:textColorPrimary"
-        android:textSize="24sp" />
-
-    <TextView
-        android:id="@+id/time_and_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="12dp"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/temp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="112sp" />
-
-    <com.example.lxl_z.alpha1.ChartView
-        android:id="@+id/hourly_forecast"
+    <FrameLayout
+        android:id="@+id/loading"
         android:layout_width="match_parent"
-        android:layout_height="120dp" />
+        android:layout_height="match_parent"
+        android:visibility="invisible">
 
-    <TableLayout
-        android:id="@+id/forecast_table"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/loading"
+            android:textSize="24sp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/error"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TableRow
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp" />
+                android:padding="16dp"
+                android:text="@string/update_failed"
+                android:textSize="24sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:enabled="false"
-                android:textSize="20sp" />
-        </TableRow>
+                android:text="@string/try_again"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 
-        <TableRow
-            android:layout_height="0dp"
-            android:layout_weight="1">
+    <ScrollView
+        android:id="@+id/ok"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
 
-            <TextView
-                android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/temp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:textSize="112sp" />
+
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/feels_like"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/relative_temp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/aqi"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/aqi"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/chance_of_rain"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/precipitation"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="176dp"
+                    android:layout_height="match_parent"
+                    android:text="@string/humidity"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/humidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <com.example.lxl_z.alpha1.ChartView
+                android:id="@+id/hourly_chart"
+                android:layout_width="match_parent"
+                android:layout_height="112dp" />
+
+            <LinearLayout
+                android:id="@+id/daily_forecast"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="20sp" />
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:textSize="20sp" />
-        </TableRow>
+                <include layout="@layout/daily_forecast" />
 
-        <TableRow
-            android:layout_height="0dp"
-            android:layout_weight="1">
+                <include layout="@layout/daily_forecast" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp" />
+                <include layout="@layout/daily_forecast" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp" />
+                <include layout="@layout/daily_forecast" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:textSize="20sp" />
-        </TableRow>
+                <include layout="@layout/daily_forecast" />
 
-        <TableRow
-            android:layout_height="0dp"
-            android:layout_weight="1">
+                <include layout="@layout/daily_forecast" />
+            </LinearLayout>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:textSize="20sp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:textSize="20sp" />
-        </TableRow>
-    </TableLayout>
-
-
-</LinearLayout>
-
-
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

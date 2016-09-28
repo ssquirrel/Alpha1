@@ -5,50 +5,32 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.TimeZone;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by LXL_z on 8/27/2016.
  */
 public class AsyncWeatherService {
+    public static final TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+8");
+
+
     private static AsyncWeatherService instance = null;
 
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_POOL_SIZE = Math.max(2, CPU_COUNT);
-    private static final int KEEP_ALIVE_SECONDS = 30;
-    private static final BlockingQueue<Runnable> Unbounded_WORK_QUEUE = new LinkedBlockingQueue<>();
-
-    private ThreadPoolExecutor executor = new ThreadPoolExecutor(CORE_POOL_SIZE,
-            CORE_POOL_SIZE,
-            KEEP_ALIVE_SECONDS,
-            TimeUnit.SECONDS,
-            Unbounded_WORK_QUEUE);
-
+    private Executor executor = Executors.newSingleThreadExecutor();
     private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-
-    private OrderedTagLock lock = new OrderedTagLock();
-
+    private Map<String, Response> cache = new HashMap<>();
     private DatabaseService dbService;
-
-    private Map<String, Integer> map = new HashMap<>();
-    private List<Response> cache = new ArrayList<>();
-    private List<WeatherUpdateHelper> helpers = new ArrayList<>();
 
     private AsyncWeatherService(Context context) {
         dbService = DatabaseService.getInstance(context);
     }
 
-    public interface OnLoadDoneCallback {
+    public interface OnLoadDoneListener {
         void onLoadDone(Response response);
     }
 
@@ -59,138 +41,65 @@ public class AsyncWeatherService {
         return instance;
     }
 
-    public AsyncWeatherTask newCurrentWeatherTask(OnLoadDoneCallback callback) {
-
-        return new AsyncWeatherTask(callback) {
-            @Override
-            protected Response doInBackground(Response cached,
-                                              CityID id,
-                                              WeatherUpdateHelper helper) {
-
-                helper.updateAQI(cached, id.stateAirID);
-                helper.updateCurrentWeather(cached, id.owmID);
-
-                Response response = new Response(cached.city);
-
-                if (cached.aqi != null)
-                    response.aqi = Collections.singletonList(cached.aqi.get(0));
-                response.weather = new Weather(cached.weather);
-
-                return response;
-            }
-        };
+    public AsyncWeather getAsyncWeather(OnLoadDoneListener c) {
+        return new AsyncWeather(c);
     }
 
-    public AsyncWeatherTask newDetailWeatherTask(OnLoadDoneCallback callback) {
-        return new AsyncWeatherTask(callback) {
-            @Override
-            protected Response doInBackground(Response cached,
-                                              CityID id,
-                                              WeatherUpdateHelper helper) {
-                helper.updateAQI(cached, id.stateAirID);
-                helper.updateCurrentWeather(cached, id.owmID);
-                helper.updateForecast(cached, id.owmID);
+    public class AsyncWeather {
+        private WeakReference<OnLoadDoneListener> weakCallback;
 
-
-                Response result = new Response(cached.city);
-
-                if (cached.aqi != null)
-                    result.aqi = new ArrayList<>(cached.aqi);
-
-                result.weather = new Weather(cached.weather);
-                result.forecast = new ArrayList<>(cached.forecast);
-                return result;
-            }
-        };
-    }
-
-    public abstract class AsyncWeatherTask {
-        private WeakReference<OnLoadDoneCallback> weakCallback;
-
-        AsyncWeatherTask(OnLoadDoneCallback c) {
+        private AsyncWeather(OnLoadDoneListener c) {
             weakCallback = new WeakReference<>(c);
         }
 
-        public void execute(List<String> cities) {
-            HttpTask[] tasks = new HttpTask[cities.size()];
-
-            for (int i = 0; i < cities.size(); i++) {
-                Integer idx = map.get(cities.get(i));
-
-                if (idx == null) {
-                    Response response = new Response(cities.get(i));
-                    WeatherUpdateHelper helper = new WeatherUpdateHelper();
-
-                    cache.add(response);
-                    helpers.add(helper);
-
-                    idx = cache.size() - 1;
-
-                    map.put(cities.get(i), idx);
-                }
-
-                tasks[i] = new HttpTask(cache.get(idx),
-                        dbService.getID(cities.get(i)),
-                        helpers.get(idx)
-                );
-            }
-
-            lock.register(tasks);
-
-            for (HttpTask task : tasks) {
-                executor.execute(task);
-            }
+        public void fetch(List<String> cities) {
+            for (String city : cities)
+                executor.execute(new Task(city, false));
         }
 
-        protected abstract Response doInBackground(Response cached,
-                                                   CityID id,
-                                                   WeatherUpdateHelper helper);
+        public void force(List<String> cities) {
+            for (String city : cities)
+                executor.execute(new Task(city, true));
+        }
 
-        private class HttpTask implements Runnable, OrderedTagLock.TagRunnable {
-            private Response cached;
-            private CityID id;
-            private WeatherUpdateHelper helper;
+        private class Task implements Runnable {
+            private String city;
+            private boolean isForced;
 
-            HttpTask(Response c, CityID i, WeatherUpdateHelper h) {
-                cached = c;
-                id = i;
-                helper = h;
+            private Task(String c, boolean i) {
+                city = c;
+                isForced = i;
             }
 
             @Override
             public void run() {
-                lock.lock(this);
+                CityID id = dbService.getID(city);
 
-                Response result;
+                Response cached = cache.get(city);
 
-                try {
-                    lock.lock(this);
+                if (cached == null)
+                    cached = dbService.getCached(city);
 
-                    result = doInBackground(cached, id, helper);
+                Response update = isForced || cached == null ?
+                        Response.update(city, id) : Response.update(cached, id);
 
-                } finally {
-                    lock.unlock(this);
+                OnLoadDoneListener strong = weakCallback.get();
+                if (strong != null)
+                    mainThreadHandler.post(new MainThreadTask(strong, update));
+
+                if (update != cached) {
+                    cache.put(city, update);
+                    dbService.putCache(update);
                 }
-
-                OnLoadDoneCallback strong = weakCallback.get();
-                if (strong == null)
-                    return;
-
-                mainThreadHandler.post(new MainThreadTask(strong, result));
-            }
-
-            @Override
-            public String getTag() {
-                return cached.city;
             }
         }
     }
 
     private static class MainThreadTask implements Runnable {
-        private OnLoadDoneCallback callback;
+        private OnLoadDoneListener callback;
         private Response response;
 
-        MainThreadTask(OnLoadDoneCallback cb, Response r) {
+        MainThreadTask(OnLoadDoneListener cb, Response r) {
             callback = cb;
             response = r;
         }
@@ -199,51 +108,6 @@ public class AsyncWeatherService {
         public void run() {
             callback.onLoadDone(response);
         }
-    }
-
-    private static class OrderedTagLock {
-        private Map<String, Queue<TagRunnable>> master = new HashMap<>();
-
-        synchronized void register(TagRunnable[] runnable) {
-            for (TagRunnable tr : runnable) {
-                Queue<TagRunnable> queue = master.get(tr.getTag());
-
-                if (queue == null) {
-                    queue = new LinkedList<>();
-                    master.put(tr.getTag(), queue);
-                }
-
-                queue.offer(tr);
-            }
-        }
-
-        synchronized void lock(TagRunnable runnable) {
-            Queue<TagRunnable> queue = master.get(runnable.getTag());
-
-            while (queue.peek() != runnable) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        synchronized void unlock(TagRunnable runnable) {
-            Queue<TagRunnable> queue = master.get(runnable.getTag());
-
-            TagRunnable polled = queue.poll();
-
-            if (polled != runnable)
-                throw new RuntimeException("OrderedTagLock UB");
-
-            notifyAll();
-        }
-
-        interface TagRunnable {
-            String getTag();
-        }
-
     }
 
 

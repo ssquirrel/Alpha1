@@ -7,12 +7,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.lxl_z.alpha1.R;
+import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +27,17 @@ import java.util.Map;
  * Created by LXL_z on 8/26/2016.
  */
 public class DatabaseService {
-    public static final String CITY_TABLE = "CITY_TABLE";
-    public static final String CITY_COL = "CITY_COL";
-    public static final String OWM_ID_COL = "OWM_ID_COL";
+    private static final String CACHE_TABLE = "CACHE_TABLE";
+    private static final String CITY_COL = "CITY_COL";
+    private static final String CACHE_COL = "CACHE_COL";
+
+    private static final String CITY_TABLE = "CITY_TABLE";
+    private static final String OWM_ID_COL = "OWM_ID_COL";
+    private static final String HW_ID_COL = "HW_ID_COL";
+
+    private static final int CITY_INDEX = 0;
+    private static final int OWM_INDEX = 1;
+    private static final int HW_INDEX = 2;
 
     private static DatabaseService instance = null;
 
@@ -31,57 +45,55 @@ public class DatabaseService {
 
     private Map<String, CityID> map = new HashMap<>();
 
-    CityID getID(String city) {
-        CityID cityID = map.get(city);
+    private Gson gson = new Gson();
 
-        if (cityID != null)
-            return cityID;
+    void putCache(Response response) {
+        ContentValues cv = new ContentValues(2);
+        cv.put(CITY_COL, response.city);
+        cv.put(CACHE_COL, gson.toJson(response));
 
-        cityID = new CityID();
+        db.replace(CACHE_TABLE, null, cv);
+    }
 
-        try (Cursor cr = db.query(DatabaseService.CITY_TABLE,
-                null,
-                DatabaseService.CITY_COL + " MATCH ?",
+    Response getCached(String city) {
+        try (Cursor cr = db.query(DatabaseService.CACHE_TABLE,
+                new String[]{DatabaseService.CACHE_COL},
+                DatabaseService.CITY_COL + "=?",
                 new String[]{city},
                 null, null, null)) {
 
-            cr.moveToFirst();
-
-            cityID.owmID = cr.getString(cr.getColumnIndex(DatabaseService.OWM_ID_COL));
-
-            //only the following cities have state air id;
-            switch (city) {
-                case "Beijing":
-                    cityID.stateAirID = "1";
-                    break;
-                case "Chengdu":
-                    cityID.stateAirID = "2";
-                    break;
-                case "Guangzhou":
-                    cityID.stateAirID = "3";
-                    break;
-                case "Shanghai":
-                    cityID.stateAirID = "4";
-                    break;
-                case "Shenyang":
-                    cityID.stateAirID = "5";
-                    break;
+            if (cr.moveToFirst()) {
+                String json = cr.getString(cr.getColumnIndex(DatabaseService.CACHE_COL));
+                return gson.fromJson(json, Response.class);
             }
         }
 
-        addID(city, cityID);
+        return null;
+    }
+
+    CityID getID(String city) {
+        CityID cityID = map.get(city);
+
+        if (cityID == null) {
+            throw new RuntimeException("No CityID record for " + city);
+        }
 
         return cityID;
     }
 
     private DatabaseService(Context context) {
-        db = context.openOrCreateDatabase("database", Context.MODE_PRIVATE, null);
+        db = context.openOrCreateDatabase("data.db", Context.MODE_PRIVATE, null);
 
         if (db.getVersion() == 0) {
+            db.execSQL("CREATE TABLE " + CACHE_TABLE + " (" +
+                    CITY_COL + " TEXT UNIQUE," +
+                    CACHE_COL + " TEXT)");
+
             db.execSQL("CREATE VIRTUAL TABLE " + CITY_TABLE +
                     " USING fts3(" +
                     CITY_COL + "," +
-                    OWM_ID_COL + ")");
+                    OWM_ID_COL + "," +
+                    HW_ID_COL + ")");
 
             db.beginTransaction();
             try (InputStream is = context.getResources().openRawResource(R.raw.list);
@@ -90,11 +102,12 @@ public class DatabaseService {
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    String[] row = line.split("\\s");
+                    String[] tokens = line.split("\\s");
 
-                    ContentValues cv = new ContentValues(2);
-                    cv.put(CITY_COL, row[0]);
-                    cv.put(OWM_ID_COL, row[1]);
+                    ContentValues cv = new ContentValues(3);
+                    cv.put(CITY_COL, tokens[CITY_INDEX]);
+                    cv.put(OWM_ID_COL, tokens[OWM_INDEX]);
+                    cv.put(HW_ID_COL, tokens[HW_INDEX]);
 
                     db.insert(CITY_TABLE, null, cv);
                 }
@@ -111,7 +124,7 @@ public class DatabaseService {
         }
     }
 
-    private void addID(String city, CityID id) {
+    private void putID(String city, CityID id) {
         map.put(city, id);
     }
 
@@ -120,6 +133,74 @@ public class DatabaseService {
             instance = new DatabaseService(context.getApplicationContext());
 
         return instance;
+    }
+
+    public static class PersistenceService {
+        private static final String FAVORITES_LIST = "FAVORITES_LIST.txt";
+
+        private DatabaseService dbService;
+        private Context context;
+
+        public PersistenceService(Context ctx) {
+            dbService = DatabaseService.getInstance(ctx);
+            context = ctx;
+        }
+
+        public List<String> restore() {
+            if (!Arrays.asList(context.fileList()).contains(FAVORITES_LIST)) {
+                return new ArrayList<>();
+            }
+
+            try (FileInputStream fin = context.openFileInput(FAVORITES_LIST);
+                 BufferedReader br = new BufferedReader(new InputStreamReader(fin))) {
+
+                List<String> cities = new ArrayList<>();
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String tokens[] = line.split("\\s");
+
+                    cities.add(tokens[CITY_INDEX]);
+
+                    CityID id = new CityID();
+                    id.owmID = tokens[OWM_INDEX];
+                    id.hwID = tokens[HW_INDEX];
+
+                    dbService.putID(tokens[CITY_INDEX], id);
+                }
+
+                return cities;
+
+            } catch (IOException e) {
+                throw new RuntimeException("PersistenceService unable to restore");
+            }
+        }
+
+        public void save(List<String> cities) {
+            try (FileOutputStream fos =
+                         context.openFileOutput(FAVORITES_LIST, Context.MODE_PRIVATE);
+                 BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos))) {
+
+
+                for (String city : cities) {
+                    CityID id = dbService.getID(city);
+
+                    String tokens[] = new String[3];
+                    tokens[CITY_INDEX] = city;
+                    tokens[OWM_INDEX] = id.owmID;
+                    tokens[HW_INDEX] = id.hwID;
+
+                    out.write(tokens[0] + " " + tokens[1] + " " + tokens[2]);
+
+                    out.newLine();
+                }
+
+            } catch (IOException e) {
+                throw new RuntimeException("PersistenceService unable to save");
+            }
+        }
+
+
     }
 
     public static class QueryService {
@@ -159,7 +240,7 @@ public class DatabaseService {
 
         public void confirm(String c) {
             int idx = city.indexOf(c);
-            dbService.addID(city.get(idx), id.get(idx));
+            dbService.putID(city.get(idx), id.get(idx));
         }
 
         private boolean isPrefix(String string, String prefix) {
@@ -204,29 +285,10 @@ public class DatabaseService {
                         result.add(c);
 
                         CityID cityID = new CityID();
+                        cityID.hwID = cr.getString(cr.getColumnIndex(DatabaseService.HW_ID_COL));
                         cityID.owmID = cr.getString(cr.getColumnIndex(DatabaseService.OWM_ID_COL));
 
-                        //only the following cities have state air id;
-                        switch (c) {
-                            case "Beijing":
-                                cityID.stateAirID = "1";
-                                break;
-                            case "Chengdu":
-                                cityID.stateAirID = "2";
-                                break;
-                            case "Guangzhou":
-                                cityID.stateAirID = "3";
-                                break;
-                            case "Shanghai":
-                                cityID.stateAirID = "4";
-                                break;
-                            case "Shenyang":
-                                cityID.stateAirID = "5";
-                                break;
-                        }
-
                         id.add(cityID);
-
 
                         cr.moveToNext();
                     }
