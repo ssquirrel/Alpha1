@@ -143,7 +143,12 @@ public class DetailPageFragment extends EmptyStateDetailFragment
         temp.setText(getString(R.string.temp_string, response.heWeather.temp));
         icon.setImageResource(response.heWeather.iconResId);
         relativeTemp.setText(getString(R.string.temp_string, response.heWeather.relativeTemp));
-        aqi.setText(String.valueOf(response.heWeather.aqi));
+
+        if (response.heWeather.aqi == Integer.MAX_VALUE)
+            aqi.setText(getString(R.string.not_available));
+        else
+            aqi.setText(String.valueOf(response.heWeather.aqi));
+
         precipitation.setText(getString(R.string.percent_string, response.heWeather.precipitation));
         humidity.setText(getString(R.string.percent_string, response.heWeather.humidity));
 

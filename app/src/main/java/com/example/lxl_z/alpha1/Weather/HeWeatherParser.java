@@ -271,7 +271,12 @@ final class HeWeatherParser {
         while (reader.hasNext()) {
             switch (reader.nextName()) {
                 case "aqi":
-                    hw.aqi = reader.nextInt();
+                    String aqi = reader.nextString();
+                    try {
+                        hw.aqi = Integer.parseInt(aqi);
+                    } catch (NumberFormatException e) {
+                        hw.aqi = Integer.MAX_VALUE;
+                    }
                     break;
                 default:
                     reader.skipValue();

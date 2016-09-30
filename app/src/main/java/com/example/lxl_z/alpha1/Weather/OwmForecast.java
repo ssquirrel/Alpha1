@@ -16,10 +16,6 @@ public class OwmForecast {
         clock = new Clock(TimeUnit.HOURS.toMillis(1));
     }
 
-    static OwmForecast fromHttpRequest(String id) throws IOException, ParseException {
-        return null;
-    }
-
     public static class HourlyForecast {
         public String time;
         public int temp;

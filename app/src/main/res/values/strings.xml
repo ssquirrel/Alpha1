@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Alpha1</string>
+    <string name="app_name">Weather</string>
     <string name="search_bar_title">search</string>
     <string name="query_result_empty">No match found</string>
 
@@ -7,6 +7,7 @@
     <string name="percent_string">%1$d%%</string>
     <string name="feels_like">Feels like</string>
     <string name="aqi">AQI</string>
+    <string name="not_available">Not available</string>
     <string name="chance_of_rain">Chance of Rain</string>
     <string name="humidity">Humidity</string>
     <string name="loading">Loading</string>

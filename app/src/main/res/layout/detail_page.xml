@@ -6,8 +6,7 @@
     <FrameLayout
         android:id="@+id/loading"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible">
+        android:layout_height="match_parent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -20,7 +19,8 @@
     <FrameLayout
         android:id="@+id/error"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="176dp"
+                    android:layout_width="168dp"
                     android:layout_height="match_parent"
                     android:text="@string/feels_like"
                     android:textSize="20sp" />
@@ -102,7 +102,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="176dp"
+                    android:layout_width="168dp"
                     android:layout_height="match_parent"
                     android:text="@string/aqi"
                     android:textSize="20sp" />
@@ -120,7 +120,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="176dp"
+                    android:layout_width="168dp"
                     android:layout_height="match_parent"
                     android:text="@string/chance_of_rain"
                     android:textSize="20sp" />
@@ -139,7 +139,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="176dp"
+                    android:layout_width="168dp"
                     android:layout_height="match_parent"
                     android:text="@string/humidity"
                     android:textSize="20sp" />

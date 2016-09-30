@@ -71,18 +71,6 @@ public class ChartView extends View {
         //
         if (data.size() == 0)
             return;
-/*
-        {
-            int color = 0xff000000;
-            Paint p = new Paint();
-            p.setStyle(Paint.Style.FILL);
-            p.setColor(color);
-            p.setStrokeCap(Paint.Cap.SQUARE);
-            p.setStrokeJoin(Paint.Join.ROUND);
-
-            canvas.drawRect(dimension, p);
-        }
-*/
 
         float step = dimension.width() / (data.size() - 2f);
 
