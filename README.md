@@ -13,12 +13,12 @@ to be simple, easy to use and yet informative.
 
 ### Screen shots
 
-The Main screen is a list view of all cities.
+The Main screen is a list view of all cities.<br/>
 ![Image of overview](https://raw.githubusercontent.com/ssquirrel/hello-world/master/alpha1_screens/overview.png)
 
-Tap any city to jump to the detail view.
+Tap any city to jump to the detail view.<br/>
 ![Image of detail](https://raw.githubusercontent.com/ssquirrel/hello-world/master/alpha1_screens/detail.png)
 
-Tap the floating action button to the search screen.
+Tap the floating action button to the search screen.<br/>
 ![Image of search](https://raw.githubusercontent.com/ssquirrel/hello-world/master/alpha1_screens/search.png)
 
