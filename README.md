@@ -1,12 +1,12 @@
 # Weather App
 
-This is a just another weather app for a quick glance at the current condition. It is designed
+This is just another weather app for a quick glance at the current condition. It is designed
 to be simple, easy to use and yet informative.
 
 ### Features
 
 * Small and fast
-* Clean and cohesive interface design & zero distraction
+* Clean and cohesive interface & zero distraction
 * Intuitive interactions using gestures such as swipe and scroll.
 * Efficient caching mechanism to minimize data usage.
 * AQI information included
