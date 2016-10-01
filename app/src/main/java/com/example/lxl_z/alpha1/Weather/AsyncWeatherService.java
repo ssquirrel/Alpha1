@@ -64,17 +64,17 @@ public class AsyncWeatherService {
 
         private class Task implements Runnable {
             private String city;
+            private CityID id;
             private boolean isForced;
 
             private Task(String c, boolean i) {
                 city = c;
+                id = dbService.getID(city);
                 isForced = i;
             }
 
             @Override
             public void run() {
-                CityID id = dbService.getID(city);
-
                 Response cached = cache.get(city);
 
                 if (cached == null)
