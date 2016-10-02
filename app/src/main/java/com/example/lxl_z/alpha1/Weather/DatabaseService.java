@@ -25,6 +25,20 @@ import java.util.Map;
 
 /**
  * Created by LXL_z on 8/26/2016.
+ * <p>
+ * DatabaseService is another essential component of this application. DatabaseService itself and
+ * its inner classes comprise the application interface to the persistent storage on Android.
+ * <p>
+ * For the sake of simplicity, this app will be shipped with a pre-populated database of cities.
+ * As a result, the number of cities provided is limited and constant. Besides the name of the city,
+ * the pre-populated database also includes corresponding CityID supplied by each data source.
+ * Every time a city is selected from the query, its CityID will be cached by DatabaseService and
+ * can be retrieved via getID.
+ * <p>
+ * DatabaseService also manages a persistent cache of Responses (weather data). This cache is also
+ * built upon SQLite database. Gson is used for serialization/deserialization. It should be noted
+ * that having a persistent cache is very important for reducing data usage as most apps are subject
+ * to frequent eviction by the system.
  */
 public class DatabaseService {
     private static final String CACHE_TABLE = "CACHE_TABLE";
@@ -135,6 +149,12 @@ public class DatabaseService {
         return instance;
     }
 
+    /*
+    * PersistenceService is used to keep track of user's selection by reading and writing to the
+    * same file. CityIDs are also stored so that database access could be avoided. Activities using
+    * PersistenceService would be kept slim as all the details are properly handled.
+    * PersistenceService also promotes better encapsulation.
+    * */
     public static class PersistenceService {
         private static final String FAVORITES_LIST = "FAVORITES_LIST.txt";
 
@@ -203,6 +223,12 @@ public class DatabaseService {
 
     }
 
+    /*
+    * QueryService is used to run queries against the pre-populated database for a target city. It
+    * also employs a small cache to reduce the number of database access. QueryService is also
+    * responsible for building up the CityId cache. Just like PersistenceService, QueryService
+    * exposes a simple interface for activities to perform some otherwise complicated tasks.
+    * */
     public static class QueryService {
         private List<String> city = new ArrayList<>();
         private List<CityID> id = new ArrayList<>();

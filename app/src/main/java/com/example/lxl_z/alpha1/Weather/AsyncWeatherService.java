@@ -14,7 +14,16 @@ import java.util.concurrent.Executors;
 
 /**
  * Created by LXL_z on 8/27/2016.
+ * <p>
+ * AsyncWeatherService is a singleton class that fulfills the primary duty of retrieving weather
+ * data in an asynchronous manner. AsyncWeatherService offloads the heavy lifting of the job
+ * (which possibly involves database access, network I/O, parsing, etc.) to a background thread
+ * so as not to block the main thread causing ANR. When the retrieval is completed, the result is
+ * posted via callback. Since a callback is required for retrieval of the result, AsyncWeatherService
+ * delegates the responsibility to AsyncWeather. AsyncWeather instances must be obtained by calling
+ * getAsyncWeather which takes an implementation of OnLoadDoneListener.
  */
+
 public class AsyncWeatherService {
     public static final TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT+8");
 
@@ -45,7 +54,13 @@ public class AsyncWeatherService {
         return new AsyncWeather(c);
     }
 
+
     public class AsyncWeather {
+        /*
+        *  The Callback is usually implemented by activities or fragments which could be destroyed at
+        *  any time. Using a WeakReference here would allow garbage collector recycle any destroyed
+        *  activity or fragment normally.
+        * */
         private WeakReference<OnLoadDoneListener> weakCallback;
 
         private AsyncWeather(OnLoadDoneListener c) {
@@ -62,11 +77,22 @@ public class AsyncWeatherService {
                 executor.execute(new Task(city, true));
         }
 
+        /*
+        *  Task class encapsulate all network retrieval & caching logic that is meant to be executed
+        *  on a background thread. Task implementation it a bit tricky because as an inner class, it
+        *  has complete access to fields of the enclosing class which are created on the main thread
+        *  and may not be safe to access from a separate thread.
+        * */
         private class Task implements Runnable {
             private String city;
             private CityID id;
             private boolean isForced;
 
+            /*
+            * It should be noted that Task construction still takes place on the main thread. So, it
+            * is perfectly safe to call getID here. (getID is backed by a hashMap which is not thread
+            * safe.)
+            * */
             private Task(String c, boolean i) {
                 city = c;
                 id = dbService.getID(city);
@@ -75,8 +101,19 @@ public class AsyncWeatherService {
 
             @Override
             public void run() {
+                /*
+                * Despite the fact that cache is a field of AsyncWeatherService, it is still safe to
+                * use it here because the executor guarantees actions prior to the task submission
+                * happens-before its execution. Executors.newSingleThreadExecutor() further ensures
+                * that tasks would be executed in a sequential manner. Therefore cache would be in a
+                * consistent and valid state for all Tasks. It also follows that cache can't be
+                * observed in a valid state on the main thread afterwards.
+                * */
                 Response cached = cache.get(city);
 
+                /*
+                * getCached and corresponding putCache are thread safe.
+                * */
                 if (cached == null)
                     cached = dbService.getCached(city);
 
