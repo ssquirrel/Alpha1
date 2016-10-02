@@ -78,7 +78,7 @@ public class AsyncWeatherService {
         }
 
         /*
-        *  Task class encapsulate all network retrieval & caching logic that is meant to be executed
+        *  Task class encapsulates all network retrieval & caching logic that is meant to be executed
         *  on a background thread. Task implementation it a bit tricky because as an inner class, it
         *  has complete access to fields of the enclosing class which are created on the main thread
         *  and may not be safe to access from a separate thread.
