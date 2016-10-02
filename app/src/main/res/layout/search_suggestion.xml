@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="56dp">
 
     <TextView
         android:id="@+id/suggestion"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:paddingBottom="8dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
-        android:paddingTop="8dp"
         android:text="CITY NAME"
-        android:textColor="@android:color/primary_text_light"
         android:textSize="16sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
         android:background="#1c000000" />
 
-</RelativeLayout>
+</FrameLayout>
