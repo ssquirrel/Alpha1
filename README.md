@@ -3,6 +3,9 @@
 This is just another weather app for a quick glance at the current condition. It is designed
 to be simple, easy to use and yet informative.
 
+### Download
+![link](https://github.com/ssquirrel/Alpha1/releases/download/v0.1/app-debug.apk)
+
 ### Features
 
 * Small and fast

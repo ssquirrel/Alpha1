@@ -31,9 +31,9 @@ import java.util.Map;
  * <p>
  * For the sake of simplicity, this app will be shipped with a pre-populated database of cities.
  * As a result, the number of cities provided is limited and constant. Besides the name of the city,
- * the pre-populated database also includes corresponding CityID supplied by each data source.
- * Every time a city is selected from the query, its CityID will be cached by DatabaseService and
- * can be retrieved via getID.
+ * the pre-populated database also includes a corresponding CityID supplied by data sources. Every
+ * time a city is selected from the query, its CityID will be cached by DatabaseService and can be
+ * retrieved via getID.
  * <p>
  * DatabaseService also manages a persistent cache of Responses (weather data). This cache is also
  * built upon SQLite database. Gson is used for serialization/deserialization. It should be noted
@@ -142,7 +142,7 @@ public class DatabaseService {
         map.put(city, id);
     }
 
-    public static DatabaseService getInstance(Context context) {
+    static DatabaseService getInstance(Context context) {
         if (instance == null)
             instance = new DatabaseService(context.getApplicationContext());
 

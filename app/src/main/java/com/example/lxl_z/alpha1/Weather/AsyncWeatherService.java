@@ -79,9 +79,9 @@ public class AsyncWeatherService {
 
         /*
         *  Task class encapsulates all network retrieval & caching logic that is meant to be executed
-        *  on a background thread. Task implementation it a bit tricky because as an inner class, it
-        *  has complete access to fields of the enclosing class which are created on the main thread
-        *  and may not be safe to access from a separate thread.
+        *  on a background thread. Task implementation here is a bit tricky because as an inner
+        *  class, it has complete access to fields of the enclosing class which are created on the
+        *  main thread and may not be safe to access from a separate thread.
         * */
         private class Task implements Runnable {
             private String city;
@@ -105,8 +105,8 @@ public class AsyncWeatherService {
                 * Despite the fact that cache is a field of AsyncWeatherService, it is still safe to
                 * use it here because the executor guarantees actions prior to the task submission
                 * happens-before its execution. Executors.newSingleThreadExecutor() further ensures
-                * that tasks would be executed in a sequential manner. Therefore cache would be in a
-                * consistent and valid state for all Tasks. It also follows that cache can't be
+                * that tasks would be executed in a sequential manner. Therefore cache would be seen
+                * in a consistent and valid state for all Tasks. It also follows that cache can't be
                 * observed in a valid state on the main thread afterwards.
                 * */
                 Response cached = cache.get(city);
